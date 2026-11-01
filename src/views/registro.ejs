@@ -1,0 +1,10 @@
+<h1>Registro (vista temporal)</h1>
+<% if (locals.error) { %><p style="color:red"><%= error %></p><% } %>
+<form method="POST" action="/registro">
+  <input name="nombre" placeholder="Nombre"><br>
+  <input name="email" type="email" placeholder="Email"><br>
+  <input name="password" type="password" placeholder="Contraseña"><br>
+  <input name="zona" placeholder="Zona (opcional)"><br>
+  <button type="submit">Registrarme</button>
+</form>
+<a href="/login">Ya tengo cuenta</a>

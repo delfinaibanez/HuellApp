@@ -1,0 +1,8 @@
+<h1>Login (vista temporal)</h1>
+<% if (locals.error) { %><p style="color:red"><%= error %></p><% } %>
+<form method="POST" action="/login">
+  <input name="email" type="email" placeholder="Email"><br>
+  <input name="password" type="password" placeholder="Contraseña"><br>
+  <button type="submit">Entrar</button>
+</form>
+<a href="/registro">Crear cuenta</a>
