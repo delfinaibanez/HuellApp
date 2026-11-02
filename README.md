@@ -54,46 +54,8 @@ Hoy las mascotas perdidas se buscan en grupos de Facebook y WhatsApp: las public
 - Cuenta gratuita en [Cloudinary](https://cloudinary.com/)
 - API key del proveedor de IA (para el matching)
 
-## 🚀 Instalación
 
-```bash
-# 1. Clonar el repositorio
-git clone https://github.com/delfinaibanez/HuellApp.git
-cd HuellApp
 
-# 2. Pasarse a la rama de desarrollo
-git checkout develop
-
-# 3. Instalar dependencias
-npm install
-
-# 4. Crear el archivo de variables de entorno
-cp .env.example .env
-# Completar los valores en .env
-
-# 5. Iniciar el servidor en modo desarrollo
-npm run dev
-```
-
-La aplicación queda disponible en `http://localhost:3000`.
-
-## 🔐 Variables de entorno
-
-Crear un archivo `.env` en la raíz del proyecto (**nunca subirlo a GitHub**). Los valores reales se comparten entre el equipo por mensaje privado.
-
-```
-PORT=3000
-MONGODB_URI=
-SESSION_SECRET=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-AI_API_KEY=
-EMAIL_USER=
-EMAIL_PASS=
-MATCH_THRESHOLD=70
-MATCH_RADIUS_KM=10
-```
 
 ## 📁 Estructura del proyecto
 
