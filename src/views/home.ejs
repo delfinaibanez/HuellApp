@@ -1,20 +1,53 @@
-<h1>HuellApp 🐾 (vista temporal)</h1>
+<%- include('partials/head', { titulo: 'Inicio' }) %>
 
-<% if (locals.error) { %><p style="color:red"><%= error %></p><% } %>
+<section class="py-4 py-lg-5">
+  <div class="row align-items-center g-5">
+    <div class="col-lg-7">
+      <h1 class="hero-titulo mb-3">Ayudamos a las mascotas a volver a casa</h1>
+      <p class="fs-5 mb-4">
+        Publicá una mascota perdida o encontrada y nuestra inteligencia artificial
+        busca coincidencias por vos.
+      </p>
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <a href="/publicaciones/nueva?tipo=perdido" class="tarjeta-tipo">
+            <div class="circulo-icono"><%- include('partials/icono-tipo', { tipo: 'perdido' }) %></div>
+            <div class="fw-bold fs-5">Perdí a mi mascota</div>
+            <div>Publicá y buscamos por vos</div>
+          </a>
+        </div>
+        <div class="col-sm-6">
+          <a href="/publicaciones/nueva?tipo=encontrado" class="tarjeta-tipo encontrado">
+            <div class="circulo-icono"><%- include('partials/icono-tipo', { tipo: 'encontrado' }) %></div>
+            <div class="fw-bold fs-5">Encontré una mascota</div>
+            <div>Ayudala a volver a casa</div>
+          </a>
+        </div>
+      </div>
+    </div>
 
-<% if (usuario) { %>
-  <p>Hola, <%= usuario.nombre %></p>
-  <ul>
-    <li><a href="/publicaciones/nueva">Nueva publicación</a></li>
-    <li><a href="/publicaciones">Ver publicaciones</a></li>
-  </ul>
-  <form method="POST" action="/logout">
-    <button type="submit">Cerrar sesión</button>
-  </form>
-<% } else { %>
-  <ul>
-    <li><a href="/login">Iniciar sesión</a></li>
-    <li><a href="/registro">Registrarme</a></li>
-    <li><a href="/publicaciones">Ver publicaciones</a></li>
-  </ul>
-<% } %>
+    <div class="col-lg-5">
+      <div class="tarjeta-blanca">
+        <div class="foto-ejemplo"></div>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div>
+            <div class="fw-bold fs-5">Posible coincidencia</div>
+            <div>Perro beagle, zona Centro</div>
+          </div>
+          <span class="puntaje">92%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-4">
+  <h2 class="text-center fw-bold mb-4">¿Cómo funciona?</h2>
+  <div class="row g-4 text-center">
+    <div class="col-md-4"><div class="tarjeta-blanca h-100"><h5 class="fw-bold">1. Publicás</h5><p class="mb-0">Foto, zona y fecha en dos minutos.</p></div></div>
+    <div class="col-md-4"><div class="tarjeta-blanca h-100"><h5 class="fw-bold">2. La IA busca</h5><p class="mb-0">Compara con publicaciones cercanas.</p></div></div>
+    <div class="col-md-4"><div class="tarjeta-blanca h-100"><h5 class="fw-bold">3. Te avisamos</h5><p class="mb-0">Notificación si hay una coincidencia.</p></div></div>
+  </div>
+</section>
+
+<%- include('partials/foot') %>
