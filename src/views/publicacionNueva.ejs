@@ -1,65 +1,147 @@
-<h1>Nueva publicación</h1>
+<%- include('partials/head', { titulo: 'Nueva publicación' }) %>
 
-<% if (locals.error) { %><p role="alert" style="color:red"><%= error %></p><% } %>
+<% const tipoSel = locals.tipoInicial || ''; %>
 
-<form method="POST" action="/publicaciones" enctype="multipart/form-data">
-  <label for="tipo">Tipo</label>
-  <select id="tipo" name="tipo" required>
-    <option value="">Elegí una opción</option>
-    <option value="perdido">Perdido</option>
-    <option value="encontrado">Encontrado</option>
-  </select><br>
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="tarjeta-blanca">
+      <h1 class="h3 fw-bold mb-1">Nueva publicación</h1>
+      <p class="mb-4">Cuantos más datos y mejores fotos, más fácil es encontrar una coincidencia.</p>
 
-  <label for="especie">Especie</label>
-  <select id="especie" name="especie" required>
-    <option value="">Elegí una opción</option>
-    <option value="perro">Perro</option>
-    <option value="gato">Gato</option>
-    <option value="otro">Otro</option>
-  </select><br>
+      <form method="POST" action="/publicaciones" enctype="multipart/form-data">
 
-  <label for="raza">Raza</label>
-  <input id="raza" name="raza"><br>
+        <p class="form-label mb-2">¿Qué pasó?</p>
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <input type="radio" class="btn-check" name="tipo" id="tipo-perdido" value="perdido" required <%= tipoSel === 'perdido' ? 'checked' : '' %>>
+            <label class="tarjeta-tipo" for="tipo-perdido">
+              <div class="circulo-icono"><%- include('partials/icono-tipo', { tipo: 'perdido' }) %></div>
+              <div class="fw-bold fs-5">Perdí a mi mascota</div>
+            </label>
+          </div>
+          <div class="col-sm-6">
+            <input type="radio" class="btn-check" name="tipo" id="tipo-encontrado" value="encontrado" <%= tipoSel === 'encontrado' ? 'checked' : '' %>>
+            <label class="tarjeta-tipo encontrado" for="tipo-encontrado">
+              <div class="circulo-icono"><%- include('partials/icono-tipo', { tipo: 'encontrado' }) %></div>
+              <div class="fw-bold fs-5">Encontré una mascota</div>
+            </label>
+          </div>
+        </div>
 
-  <label for="color">Color</label>
-  <input id="color" name="color" required><br>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="especie" class="form-label">Especie</label>
+            <select class="form-select" id="especie" name="especie" required>
+              <option value="" selected disabled>Elegí una opción</option>
+              <option value="perro">Perro</option>
+              <option value="gato">Gato</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="tamano" class="form-label">Tamaño</label>
+            <select class="form-select" id="tamano" name="tamano" required>
+              <option value="" selected disabled>Elegí una opción</option>
+              <option value="pequeno">Pequeño</option>
+              <option value="mediano">Mediano</option>
+              <option value="grande">Grande</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="raza" class="form-label">Raza <span class="fw-normal">(opcional)</span></label>
+            <input type="text" class="form-control" id="raza" name="raza">
+          </div>
+          <div class="col-md-6">
+            <label for="color" class="form-label">Color</label>
+            <input type="text" class="form-control" id="color" name="color" required>
+          </div>
+          <div class="col-12">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+          </div>
+          <div class="col-12">
+            <label for="rasgos" class="form-label">Rasgos distintivos <span class="fw-normal">(collar, manchas, cicatrices, chip)</span></label>
+            <textarea class="form-control" id="rasgos" name="rasgos" rows="2"></textarea>
+          </div>
+          <div class="col-md-6">
+            <label for="fechaEvento" class="form-label">Fecha en que se perdió o encontró</label>
+            <input type="date" class="form-control" id="fechaEvento" name="fechaEvento" required>
+          </div>
+          <div class="col-md-6">
+            <label for="zona" class="form-label">Barrio o localidad</label>
+            <input type="text" class="form-control" id="zona" name="zona" required>
+          </div>
 
-  <label for="tamano">Tamaño</label>
-  <select id="tamano" name="tamano" required>
-    <option value="">Elegí una opción</option>
-    <option value="pequeno">Pequeño</option>
-    <option value="mediano">Mediano</option>
-    <option value="grande">Grande</option>
-  </select><br>
+          <div class="col-12">
+            <p class="form-label mb-1">Ubicación</p>
+            <button type="button" class="btn btn-contorno btn-sm mb-2" id="btnUbicacion">Usar mi ubicación actual</button>
+            <span id="msgUbicacion" class="ms-2 small"></span>
+            <div class="row g-3">
+              <div class="col-6">
+                <label for="latitud" class="form-label small">Latitud</label>
+                <input type="text" class="form-control" id="latitud" name="latitud" placeholder="-32.8895" required>
+              </div>
+              <div class="col-6">
+                <label for="longitud" class="form-label small">Longitud</label>
+                <input type="text" class="form-control" id="longitud" name="longitud" placeholder="-68.8272" required>
+              </div>
+            </div>
+          </div>
 
-  <label for="descripcion">Descripción</label>
-  <textarea id="descripcion" name="descripcion" required></textarea><br>
+          <div class="col-12">
+            <label for="fotos" class="form-label">Fotos <span class="fw-normal">(hasta 2, JPG, PNG o WEBP, 5 MB cada una)</span></label>
+            <input type="file" class="form-control" id="fotos" name="fotos" accept="image/jpeg,image/png,image/webp" multiple>
+            <div id="previas" class="d-flex gap-3 mt-3"></div>
+          </div>
+        </div>
 
-  <label for="rasgos">Rasgos distintivos</label>
-  <textarea id="rasgos" name="rasgos"></textarea><br>
+        <button type="submit" class="btn btn-huellapp w-100 mt-4">Publicar</button>
+      </form>
+    </div>
+  </div>
+</div>
 
-  <label for="fechaEvento">Fecha en que se perdió o encontró</label>
-  <input id="fechaEvento" name="fechaEvento" type="date" required><br>
+<script>
+  // Fecha máxima: hoy
+  document.getElementById('fechaEvento').max = new Date().toISOString().split('T')[0];
 
-  <label for="zona">Barrio o localidad</label>
-  <input id="zona" name="zona" required><br>
+  // Vista previa de fotos (máximo 2)
+  const inputFotos = document.getElementById('fotos');
+  const previas = document.getElementById('previas');
+  inputFotos.addEventListener('change', () => {
+    previas.innerHTML = '';
+    const archivos = Array.from(inputFotos.files).slice(0, 2);
+    archivos.forEach((archivo) => {
+      const img = document.createElement('img');
+      img.className = 'vista-previa';
+      img.alt = 'Vista previa de la foto';
+      img.src = URL.createObjectURL(archivo);
+      previas.appendChild(img);
+    });
+    if (inputFotos.files.length > 2) {
+      alert('Solo se permiten 2 fotos. Se usarán las primeras 2.');
+    }
+  });
 
-  <label for="latitud">Latitud</label>
-  <input id="latitud" name="latitud" type="number" step="any" min="-90" max="90" required><br>
+  // Completar latitud y longitud con la ubicación del dispositivo
+  document.getElementById('btnUbicacion').addEventListener('click', () => {
+    const msg = document.getElementById('msgUbicacion');
+    if (!navigator.geolocation) {
+      msg.textContent = 'Tu navegador no permite obtener la ubicación.';
+      return;
+    }
+    msg.textContent = 'Buscando ubicación...';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        document.getElementById('latitud').value = pos.coords.latitude.toFixed(6);
+        document.getElementById('longitud').value = pos.coords.longitude.toFixed(6);
+        msg.textContent = 'Ubicación completada.';
+      },
+      () => {
+        msg.textContent = 'No se pudo obtener. Completala a mano.';
+      }
+    );
+  });
+</script>
 
-  <label for="longitud">Longitud</label>
-  <input id="longitud" name="longitud" type="number" step="any" min="-180" max="180" required><br>
-
-  <label for="fotos">Fotos (JPG, PNG o WEBP; hasta 2 fotos de 5 MB cada una)</label>
-  <input
-    id="fotos"
-    name="fotos"
-    type="file"
-    accept="image/jpeg,image/png,image/webp"
-    multiple
-  ><br>
-
-  <button type="submit">Publicar</button>
-</form>
-
-<a href="/">Volver al inicio</a>
+<%- include('partials/foot') %>

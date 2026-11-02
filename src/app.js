@@ -3,6 +3,7 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const connectDB = require('./config/db');
+const Notificacion = require('./models/Notificacion');
 
 const app = express();
 
@@ -26,7 +27,25 @@ app.use(
 app.use((req, res, next) => {
   res.locals.usuario = req.session.usuario || null;
   res.locals.error = req.session.error || null;
+  res.locals.noLeidas = 0;
   delete req.session.error; // el mensaje se muestra una sola vez
+  next();
+});
+
+app.use(async (req, res, next) => {
+  if (!req.session.usuario) {
+    return next();
+  }
+
+  try {
+    res.locals.noLeidas = await Notificacion.countDocuments({
+      usuario: req.session.usuario.id,
+      leida: false,
+    });
+  } catch (error) {
+    console.error('Error al contar notificaciones:', error.message);
+  }
+
   next();
 });
 

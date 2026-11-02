@@ -3,9 +3,11 @@ const Publicacion = require('../models/Publicacion');
 const { eliminarFoto, subirFoto } = require('../services/cloudinary');
 
 function mostrarFormulario(req, res) {
-  res.render('publicacionNueva');
+  const tipoInicial = ['perdido', 'encontrado'].includes(req.query.tipo)
+    ? req.query.tipo
+    : '';
+  res.render('publicacionNueva', { tipoInicial });
 }
-
 async function listar(req, res) {
   try {
     const publicaciones = await Publicacion.find({ estado: 'activa' })
