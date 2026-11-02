@@ -1,0 +1,25 @@
+<h1>Publicaciones</h1>
+
+<% if (publicaciones.length === 0) { %>
+  <p>Todavía no hay publicaciones.</p>
+<% } else { %>
+  <ul>
+    <% publicaciones.forEach((publicacion) => { %>
+      <li>
+        <a href="/publicaciones/<%= publicacion._id %>">
+          <%= publicacion.tipo === 'perdido' ? 'Perdido' : 'Encontrado' %>:
+          <%= publicacion.especie %> — <%= publicacion.zona %>
+        </a>
+        <% if (publicacion.fotos.length > 0) { %>
+          <img
+            src="<%= publicacion.fotos[0] %>"
+            alt="Foto de <%= publicacion.especie %>"
+            width="160"
+          >
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<a href="/">Volver al inicio</a>

@@ -3,7 +3,6 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const connectDB = require('./config/db');
-const { requireLogin } = require('./middlewares/auth');
 
 const app = express();
 
@@ -32,17 +31,10 @@ app.use((req, res, next) => {
 });
 
 app.use('/', require('./routes/auth'));
+app.use('/', require('./routes/publicaciones'));
 
 app.get('/', (req, res) => {
-  const saludo = req.session.usuario
-    ? `Hola ${req.session.usuario.nombre} 🐾`
-    : 'HuellApp funcionando 🐾';
-  res.send(saludo);
-});
-
-// RUTA TEMPORAL para probar el middleware (se borra después de probar)
-app.get('/privado', requireLogin, (req, res) => {
-  res.send('Entraste a una ruta protegida ✅');
+  res.render('home');
 });
 
 const PORT = process.env.PORT || 3000;

@@ -1,0 +1,20 @@
+<h1>HuellApp 🐾 (vista temporal)</h1>
+
+<% if (locals.error) { %><p style="color:red"><%= error %></p><% } %>
+
+<% if (usuario) { %>
+  <p>Hola, <%= usuario.nombre %></p>
+  <ul>
+    <li><a href="/publicaciones/nueva">Nueva publicación</a></li>
+    <li><a href="/publicaciones">Ver publicaciones</a></li>
+  </ul>
+  <form method="POST" action="/logout">
+    <button type="submit">Cerrar sesión</button>
+  </form>
+<% } else { %>
+  <ul>
+    <li><a href="/login">Iniciar sesión</a></li>
+    <li><a href="/registro">Registrarme</a></li>
+    <li><a href="/publicaciones">Ver publicaciones</a></li>
+  </ul>
+<% } %>
