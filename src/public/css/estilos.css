@@ -118,6 +118,20 @@ body {
   color: #fff;
 }
 
+/* Formularios */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--naranja);
+  box-shadow: 0 0 0 0.2rem rgba(184, 78, 15, 0.2);
+}
+.form-label {
+  font-weight: 700;
+}
+.enlace-huellapp {
+  color: var(--naranja);
+  font-weight: 700;
+}
+
 /* Selector de tipo (perdido / encontrado) */
 .btn-check:checked + .tarjeta-tipo {
   background: var(--naranja-claro);
@@ -139,4 +153,5 @@ body {
   object-fit: cover;
   border-radius: 0.75rem;
   border: 2px solid var(--naranja-claro);
+}
 }

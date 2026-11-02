@@ -29,7 +29,7 @@
           <li class="nav-item">
             <a class="nav-link" href="/notificaciones">
               Notificaciones
-              <% if (noLeidas > 0) { %>
+                <% if (locals.noLeidas > 0) { %>
                 <span class="badge rounded-pill bg-danger"><%= noLeidas %></span>
               <% } %>
             </a>
