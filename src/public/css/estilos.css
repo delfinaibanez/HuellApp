@@ -1,0 +1,133 @@
+:root {
+  --naranja: #B84E0F;
+  --naranja-claro: #FBE0CB;
+  --verde: #2F7D4F;
+  --verde-claro: #D9EFE1;
+  --crema: #FFF6EC;
+  --marron: #3B2A20;
+  --bs-body-font-family: 'Nunito', sans-serif;
+}
+
+body {
+  background-color: var(--crema);
+  color: var(--marron);
+  font-family: 'Nunito', sans-serif;
+}
+
+.navbar-huellapp {
+  background-color: var(--crema);
+}
+.navbar-huellapp .navbar-brand {
+  color: var(--naranja);
+  font-weight: 800;
+  font-size: 1.6rem;
+}
+.navbar-huellapp .nav-link {
+  color: var(--marron);
+  font-weight: 700;
+}
+
+.btn-huellapp {
+  background-color: var(--naranja);
+  border-color: var(--naranja);
+  color: #fff;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 0.6rem 1.4rem;
+}
+.btn-huellapp:hover {
+  background-color: #9c400a;
+  border-color: #9c400a;
+  color: #fff;
+}
+
+.btn-contorno {
+  border: 2px solid var(--marron);
+  color: var(--marron);
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 0.6rem 1.4rem;
+}
+.btn-contorno:hover {
+  background-color: var(--marron);
+  color: #fff;
+}
+
+/* Tarjetas "Perdí" / "Encontré" */
+.tarjeta-tipo {
+  display: block;
+  background: #fff;
+  border: 2px solid var(--naranja);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  text-decoration: none;
+  color: var(--marron);
+  height: 100%;
+  transition: transform 0.15s;
+}
+.tarjeta-tipo:hover {
+  transform: translateY(-3px);
+  color: var(--marron);
+}
+.tarjeta-tipo.encontrado {
+  border-color: var(--verde);
+}
+.circulo-icono {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  background: var(--naranja-claro);
+  color: var(--naranja);
+}
+.encontrado .circulo-icono {
+  background: var(--verde-claro);
+  color: var(--verde);
+}
+
+.hero-titulo {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.tarjeta-blanca {
+  background: #fff;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: 0 12px 30px rgba(120, 60, 20, 0.12);
+}
+.foto-ejemplo {
+  height: 180px;
+  border-radius: 1rem;
+  background: #F5C9A4;
+}
+.puntaje {
+  background: var(--verde);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  font-weight: 800;
+}
+
+.footer-huellapp {
+  background-color: var(--marron);
+  color: #fff;
+}
+
+/* Formularios */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--naranja);
+  box-shadow: 0 0 0 0.2rem rgba(184, 78, 15, 0.2);
+}
+.form-label {
+  font-weight: 700;
+}
+.enlace-huellapp {
+  color: var(--naranja);
+  font-weight: 700;
+}
