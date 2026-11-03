@@ -1,5 +1,7 @@
 <%- include('partials/head', { titulo: 'Nueva publicación' }) %>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 <% const tipoSel = locals.tipoInicial || ''; %>
 
 <div class="row justify-content-center">
@@ -74,16 +76,18 @@
 
           <div class="col-12">
             <p class="form-label mb-1">Ubicación</p>
-            <button type="button" class="btn btn-contorno btn-sm mb-2" id="btnUbicacion">Usar mi ubicación actual</button>
+            <p class="small mb-2">Hacé clic en el mapa donde se perdió o encontró la mascota.</p>
+            <div id="mapa" class="mapa mb-2"></div>
+            <button type="button" class="btn btn-contorno btn-sm" id="btnUbicacion">Usar mi ubicación actual</button>
             <span id="msgUbicacion" class="ms-2 small"></span>
-            <div class="row g-3">
+            <div class="row g-3 mt-1">
               <div class="col-6">
                 <label for="latitud" class="form-label small">Latitud</label>
-                <input type="text" class="form-control" id="latitud" name="latitud" placeholder="-32.8895" required>
+                <input type="text" class="form-control" id="latitud" name="latitud" placeholder="Se completa al elegir en el mapa" required>
               </div>
               <div class="col-6">
                 <label for="longitud" class="form-label small">Longitud</label>
-                <input type="text" class="form-control" id="longitud" name="longitud" placeholder="-68.8272" required>
+                <input type="text" class="form-control" id="longitud" name="longitud" placeholder="Se completa al elegir en el mapa" required>
               </div>
             </div>
           </div>
@@ -101,6 +105,7 @@
   </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   // Fecha máxima: hoy
   document.getElementById('fechaEvento').max = new Date().toISOString().split('T')[0];
@@ -123,7 +128,28 @@
     }
   });
 
-  // Completar latitud y longitud con la ubicación del dispositivo
+  // Mapa para elegir la ubicación (centrado en Mendoza por defecto)
+  const campoLat = document.getElementById('latitud');
+  const campoLng = document.getElementById('longitud');
+  const mapa = L.map('mapa').setView([-32.8895, -68.8272], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap',
+  }).addTo(mapa);
+
+  let marcador = null;
+  function ponerMarcador(lat, lng) {
+    if (marcador) {
+      marcador.setLatLng([lat, lng]);
+    } else {
+      marcador = L.marker([lat, lng]).addTo(mapa);
+    }
+    campoLat.value = lat.toFixed(6);
+    campoLng.value = lng.toFixed(6);
+  }
+  mapa.on('click', (e) => ponerMarcador(e.latlng.lat, e.latlng.lng));
+
+  // Usar la ubicación del dispositivo
   document.getElementById('btnUbicacion').addEventListener('click', () => {
     const msg = document.getElementById('msgUbicacion');
     if (!navigator.geolocation) {
@@ -133,12 +159,12 @@
     msg.textContent = 'Buscando ubicación...';
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        document.getElementById('latitud').value = pos.coords.latitude.toFixed(6);
-        document.getElementById('longitud').value = pos.coords.longitude.toFixed(6);
+        ponerMarcador(pos.coords.latitude, pos.coords.longitude);
+        mapa.setView([pos.coords.latitude, pos.coords.longitude], 15);
         msg.textContent = 'Ubicación completada.';
       },
       () => {
-        msg.textContent = 'No se pudo obtener. Completala a mano.';
+        msg.textContent = 'No se pudo obtener. Elegí el punto en el mapa.';
       }
     );
   });
