@@ -215,3 +215,16 @@ body {
   object-fit: cover;
   border-radius: 1rem;
 }
+
+/* Notificaciones */
+.notificacion {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  border-left: 6px solid #E5D5C8;
+  box-shadow: 0 6px 18px rgba(120, 60, 20, 0.08);
+}
+.notificacion.nueva {
+  border-left-color: var(--naranja);
+  background: #FFFBF7;
+}
