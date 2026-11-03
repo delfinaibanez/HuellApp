@@ -27,30 +27,29 @@ app.use(
 app.use((req, res, next) => {
   res.locals.usuario = req.session.usuario || null;
   res.locals.error = req.session.error || null;
-  res.locals.noLeidas = 0;
   delete req.session.error; // el mensaje se muestra una sola vez
   next();
 });
 
+// Cantidad de notificaciones sin leer (disponible en todas las vistas)
 app.use(async (req, res, next) => {
-  if (!req.session.usuario) {
-    return next();
+  res.locals.noLeidas = 0;
+  if (req.session.usuario) {
+    try {
+      res.locals.noLeidas = await Notificacion.countDocuments({
+        usuario: req.session.usuario.id,
+        leida: false,
+      });
+    } catch (error) {
+      console.error('Error al contar notificaciones:', error.message);
+    }
   }
-
-  try {
-    res.locals.noLeidas = await Notificacion.countDocuments({
-      usuario: req.session.usuario.id,
-      leida: false,
-    });
-  } catch (error) {
-    console.error('Error al contar notificaciones:', error.message);
-  }
-
   next();
 });
 
 app.use('/', require('./routes/auth'));
 app.use('/', require('./routes/publicaciones'));
+app.use('/', require('./routes/notificaciones'));
 
 app.get('/', (req, res) => {
   res.render('home');

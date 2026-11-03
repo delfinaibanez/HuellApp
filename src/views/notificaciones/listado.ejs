@@ -1,0 +1,29 @@
+<h1>Notificaciones</h1>
+
+<% if (notificaciones.some((notificacion) => !notificacion.leida)) { %>
+  <form method="POST" action="/notificaciones/leer-todas">
+    <button type="submit">Marcar todas como leídas</button>
+  </form>
+<% } %>
+
+<% if (notificaciones.length === 0) { %>
+  <p>No tenés notificaciones todavía.</p>
+<% } else { %>
+  <ul>
+    <% notificaciones.forEach((notificacion) => { %>
+      <li>
+        <p><%= notificacion.mensaje %></p>
+        <small><%= notificacion.createdAt.toLocaleString('es-AR') %></small>
+        <% if (!notificacion.leida) { %>
+          <form method="POST" action="/notificaciones/<%= notificacion._id %>/leer">
+            <button type="submit">Marcar como leída</button>
+          </form>
+        <% } else { %>
+          <span>Leída</span>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<a href="/">Volver al inicio</a>
