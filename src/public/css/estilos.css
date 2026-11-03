@@ -131,3 +131,27 @@ body {
   color: var(--naranja);
   font-weight: 700;
 }
+
+/* Selector de tipo (perdido / encontrado) */
+.btn-check:checked + .tarjeta-tipo {
+  background: var(--naranja-claro);
+  box-shadow: 0 0 0 3px var(--naranja);
+}
+.btn-check:checked + .tarjeta-tipo.encontrado {
+  background: var(--verde-claro);
+  box-shadow: 0 0 0 3px var(--verde);
+}
+.btn-check:focus-visible + .tarjeta-tipo {
+  outline: 3px solid var(--marron);
+  outline-offset: 2px;
+}
+
+/* Vista previa de fotos */
+.vista-previa {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  border: 2px solid var(--naranja-claro);
+}
+}
