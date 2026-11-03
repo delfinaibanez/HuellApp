@@ -51,6 +51,7 @@ app.use('/', require('./routes/auth'));
 app.use('/', require('./routes/publicaciones'));
 app.use('/', require('./routes/notificaciones'));
 app.use('/', require('./routes/coincidencias'));
+app.use('/', require('./routes/perfil'));
 
 app.get('/', (req, res) => {
   res.render('home');

@@ -1,0 +1,78 @@
+<%- include('partials/head', { titulo: 'Mi perfil' }) %>
+
+<div class="row g-4">
+
+  <div class="col-lg-4">
+    <div class="tarjeta-blanca">
+      <h1 class="h4 fw-bold mb-1"><%= perfil.nombre %></h1>
+      <div><%= perfil.email %></div>
+      <% if (perfil.zona) { %><div>Zona: <%= perfil.zona %></div><% } %>
+
+      <div class="row text-center mt-4 g-2">
+        <div class="col-6">
+          <div class="fs-3 fw-bold"><%= activas %></div>
+          <small>Activas</small>
+        </div>
+        <div class="col-6">
+          <div class="fs-3 fw-bold"><%= resueltas %></div>
+          <small>Resueltas</small>
+        </div>
+      </div>
+
+      <a href="/notificaciones" class="btn btn-contorno w-100 mt-4">
+        Notificaciones
+        <% if (locals.noLeidas > 0) { %>
+          <span class="badge rounded-pill bg-danger"><%= noLeidas %></span>
+        <% } %>
+      </a>
+      <a href="/publicaciones/nueva" class="btn btn-huellapp w-100 mt-2">Nueva publicación</a>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <h2 class="h4 fw-bold mb-3">Mis publicaciones</h2>
+
+    <% if (publicaciones.length === 0) { %>
+      <div class="tarjeta-blanca text-center">
+        <p class="mb-1 fw-bold">Todavía no publicaste nada</p>
+        <p class="mb-0">Cuando publiques una mascota perdida o encontrada, la vas a ver acá.</p>
+      </div>
+    <% } else { %>
+      <div class="d-flex flex-column gap-3">
+        <% publicaciones.forEach((p) => { %>
+          <div class="tarjeta-blanca d-flex gap-3 align-items-center flex-wrap">
+            <% if (p.fotos && p.fotos.length > 0) { %>
+              <img src="<%= p.fotos[0] %>" alt="Foto de la mascota" class="vista-previa">
+            <% } else { %>
+              <div class="sin-foto vista-previa">Sin foto</div>
+            <% } %>
+
+            <div class="flex-grow-1">
+              <span class="etiqueta-tipo <%= p.tipo === 'encontrado' ? 'encontrado' : '' %>">
+                <%- include('partials/icono-tipo', { tipo: p.tipo }) %>
+                <%= p.tipo === 'perdido' ? 'Perdido' : 'Encontrado' %>
+              </span>
+              <% if (p.estado === 'resuelta') { %>
+                <span class="badge text-bg-secondary">Resuelta</span>
+              <% } %>
+              <div class="fw-bold mt-1"><%= p.especie.charAt(0).toUpperCase() + p.especie.slice(1) %><%= p.raza ? ' · ' + p.raza : '' %></div>
+              <small><%= p.zona %> · <%= p.fechaEvento.toLocaleDateString('es-AR') %></small>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+              <a href="/publicaciones/<%= p._id %>" class="btn btn-contorno btn-sm">Ver</a>
+              <% if (p.estado === 'activa') { %>
+                <form method="POST" action="/publicaciones/<%= p._id %>/resolver" class="m-0">
+                  <button type="submit" class="btn btn-huellapp btn-sm">Marcar como resuelta</button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+</div>
+
+<%- include('partials/foot') %>

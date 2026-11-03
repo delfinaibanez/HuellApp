@@ -34,7 +34,7 @@
               <% } %>
             </a>
           </li>
-          <li class="nav-item"><span class="navbar-text fw-bold">Hola, <%= usuario.nombre %></span></li>
+          <li class="nav-item"><a class="nav-link" href="/perfil">Hola, <%= usuario.nombre %></a></li>
           <li class="nav-item">
             <form method="POST" action="/logout" class="m-0">
               <button type="submit" class="btn btn-contorno btn-sm">Salir</button>
