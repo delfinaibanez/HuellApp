@@ -26,35 +26,6 @@
       </div>
     </div>
 
-
-<%- include('partials/head', { titulo: 'Inicio' }) %>
-
-<section class="py-4 py-lg-5">
-  <div class="row align-items-center g-5">
-    <div class="col-lg-7">
-      <h1 class="hero-titulo mb-3">Ayudamos a las mascotas a volver a casa</h1>
-      <p class="fs-5 mb-4">
-        Publicá una mascota perdida o encontrada y nuestra inteligencia artificial
-        busca coincidencias por vos.
-      </p>
-      <div class="row g-3">
-        <div class="col-sm-6">
-          <a href="/publicaciones/nueva?tipo=perdido" class="tarjeta-tipo">
-            <div class="circulo-icono"><%- include('partials/icono-tipo', { tipo: 'perdido' }) %></div>
-            <div class="fw-bold fs-5">Perdí a mi mascota</div>
-            <div>Publicá y buscamos por vos</div>
-          </a>
-        </div>
-        <div class="col-sm-6">
-          <a href="/publicaciones/nueva?tipo=encontrado" class="tarjeta-tipo encontrado">
-            <div class="circulo-icono"><%- include('partials/icono-tipo', { tipo: 'encontrado' }) %></div>
-            <div class="fw-bold fs-5">Encontré una mascota</div>
-            <div>Ayudala a volver a casa</div>
-          </a>
-        </div>
-      </div>
-    </div>
-
     <div class="col-lg-5">
       <div class="tarjeta-blanca">
         <div class="foto-ejemplo"></div>

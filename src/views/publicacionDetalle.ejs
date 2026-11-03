@@ -1,25 +1,58 @@
-<h1>
-  <%= publicacion.tipo === 'perdido' ? 'Animal perdido' : 'Animal encontrado' %>
-</h1>
+<%- include('partials/head', { titulo: 'Detalle' }) %>
 
-<p><strong>Especie:</strong> <%= publicacion.especie %></p>
-<% if (publicacion.raza) { %><p><strong>Raza:</strong> <%= publicacion.raza %></p><% } %>
-<p><strong>Color:</strong> <%= publicacion.color %></p>
-<p><strong>Tamaño:</strong> <%= publicacion.tamano %></p>
-<p><strong>Descripción:</strong> <%= publicacion.descripcion %></p>
-<% if (publicacion.rasgos) { %><p><strong>Rasgos:</strong> <%= publicacion.rasgos %></p><% } %>
-<p><strong>Fecha:</strong> <%= publicacion.fechaEvento.toLocaleDateString('es-AR', { timeZone: 'UTC' }) %></p>
-<p><strong>Zona:</strong> <%= publicacion.zona %></p>
-<p><strong>Publicado por:</strong> <%= publicacion.usuario.nombre %></p>
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="tarjeta-blanca">
 
-<% if (publicacion.fotos.length > 0) { %>
-  <section aria-label="Fotos de la publicación">
-    <% publicacion.fotos.forEach((foto, indice) => { %>
-      <img src="<%= foto %>" alt="Foto <%= indice + 1 %> del animal" width="320">
-    <% }) %>
-  </section>
-<% } else { %>
-  <p>Esta publicación no tiene fotos.</p>
-<% } %>
+      <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+        <span class="etiqueta-tipo <%= publicacion.tipo === 'encontrado' ? 'encontrado' : '' %>">
+          <%- include('partials/icono-tipo', { tipo: publicacion.tipo }) %>
+          <%= publicacion.tipo === 'perdido' ? 'Perdido' : 'Encontrado' %>
+        </span>
+        <% if (publicacion.estado === 'resuelta') { %>
+          <span class="badge text-bg-secondary">Resuelta</span>
+        <% } %>
+      </div>
 
-<a href="/publicaciones">Ver todas las publicaciones</a>
+      <h1 class="h3 fw-bold">
+        <%= publicacion.especie.charAt(0).toUpperCase() + publicacion.especie.slice(1) %><%= publicacion.raza ? ' · ' + publicacion.raza : '' %>
+      </h1>
+
+      <% if (publicacion.fotos && publicacion.fotos.length > 0) { %>
+        <div class="row g-3 my-2">
+          <% publicacion.fotos.forEach((url) => { %>
+            <div class="col-sm-6">
+              <img src="<%= url %>" alt="Foto de la mascota" class="foto-detalle">
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p class="text-secondary">Esta publicación no tiene fotos.</p>
+      <% } %>
+
+      <dl class="row mt-3 mb-0">
+        <dt class="col-sm-4">Color</dt><dd class="col-sm-8"><%= publicacion.color %></dd>
+        <dt class="col-sm-4">Tamaño</dt><dd class="col-sm-8"><%= publicacion.tamano %></dd>
+        <dt class="col-sm-4">Descripción</dt><dd class="col-sm-8"><%= publicacion.descripcion %></dd>
+        <% if (publicacion.rasgos) { %>
+          <dt class="col-sm-4">Rasgos</dt><dd class="col-sm-8"><%= publicacion.rasgos %></dd>
+        <% } %>
+        <dt class="col-sm-4">Fecha</dt><dd class="col-sm-8"><%= publicacion.fechaEvento.toLocaleDateString('es-AR') %></dd>
+        <dt class="col-sm-4">Zona</dt><dd class="col-sm-8"><%= publicacion.zona %></dd>
+        <dt class="col-sm-4">Publicado por</dt><dd class="col-sm-8"><%= publicacion.usuario.nombre %></dd>
+      </dl>
+
+      <div class="d-flex gap-2 flex-wrap mt-4">
+        <a href="/publicaciones" class="btn btn-contorno">Volver al listado</a>
+        <% if (esDueno && publicacion.estado === 'activa') { %>
+          <form method="POST" action="/publicaciones/<%= publicacion._id %>/resolver" class="m-0">
+            <button type="submit" class="btn btn-huellapp">Marcar como resuelta</button>
+          </form>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<%- include('partials/foot') %>

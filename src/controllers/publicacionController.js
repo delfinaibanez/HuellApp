@@ -2,19 +2,38 @@ const mongoose = require('mongoose');
 const Publicacion = require('../models/Publicacion');
 const { eliminarFoto, subirFoto } = require('../services/cloudinary');
 
+function texto(valor) {
+  return typeof valor === 'string' ? valor.trim() : '';
+}
+
+function escaparRegex(valor) {
+  return valor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function mostrarFormulario(req, res) {
   const tipoInicial = ['perdido', 'encontrado'].includes(req.query.tipo)
     ? req.query.tipo
     : '';
   res.render('publicacionNueva', { tipoInicial });
 }
+
 async function listar(req, res) {
   try {
-    const publicaciones = await Publicacion.find({ estado: 'activa' })
+    const { tipo, especie, zona } = req.query;
+    const filtro = { estado: 'activa' };
+
+    if (['perdido', 'encontrado'].includes(tipo)) filtro.tipo = tipo;
+    if (['perro', 'gato', 'otro'].includes(especie)) filtro.especie = especie;
+    if (typeof zona === 'string' && zona.trim()) {
+      filtro.zona = new RegExp(escaparRegex(zona.trim()), 'i');
+    }
+
+    const publicaciones = await Publicacion.find(filtro)
       .sort({ createdAt: -1 })
+      .limit(60)
       .populate('usuario', 'nombre');
 
-    res.render('publicaciones', { publicaciones });
+    res.render('publicaciones', { publicaciones, filtros: req.query });
   } catch (error) {
     console.error('Error al listar publicaciones:', error.message);
     res.status(500).send('No se pudieron cargar las publicaciones.');
@@ -32,15 +51,15 @@ async function mostrarDetalle(req, res) {
       return res.status(404).send('Publicación no encontrada.');
     }
 
-    res.render('publicacionDetalle', { publicacion });
+    const esDueno =
+      !!req.session.usuario &&
+      publicacion.usuario._id.toString() === req.session.usuario.id;
+
+    res.render('publicacionDetalle', { publicacion, esDueno });
   } catch (error) {
     console.error('Error al cargar publicación:', error.message);
     res.status(500).send('No se pudo cargar la publicación.');
   }
-}
-
-function texto(valor) {
-  return typeof valor === 'string' ? valor.trim() : '';
 }
 
 async function crear(req, res) {
@@ -92,6 +111,10 @@ async function crear(req, res) {
     publicacion.fotos = fotosSubidas.map((foto) => foto.url);
     await publicacion.save();
 
+    // TODO (Carolina): acá se llama al servicio de matching con IA.
+    // Debe atrapar sus propios errores para no frenar la publicación.
+    // Ejemplo: matchingService.buscarCoincidencias(publicacion).catch(console.error);
+
     res.redirect(`/publicaciones/${publicacion._id}`);
   } catch (error) {
     await Promise.all(
@@ -115,9 +138,34 @@ async function crear(req, res) {
   }
 }
 
+async function marcarResuelta(req, res) {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(404).send('Publicación no encontrada.');
+  }
+
+  try {
+    const publicacion = await Publicacion.findById(req.params.id);
+    if (!publicacion) {
+      return res.status(404).send('Publicación no encontrada.');
+    }
+    if (publicacion.usuario.toString() !== req.session.usuario.id) {
+      return res.status(403).send('No tenés permiso para modificar esta publicación.');
+    }
+
+    publicacion.estado = 'resuelta';
+    await publicacion.save();
+
+    res.redirect(`/publicaciones/${publicacion._id}`);
+  } catch (error) {
+    console.error('Error al marcar como resuelta:', error.message);
+    res.status(500).send('No se pudo actualizar la publicación.');
+  }
+}
+
 module.exports = {
   crear,
   listar,
   mostrarDetalle,
   mostrarFormulario,
+  marcarResuelta,
 };
