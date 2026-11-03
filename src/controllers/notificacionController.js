@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Notificacion = require('../models/Notificacion');
-
+require('../models/Coincidencia');
 async function listar(req, res) {
   try {
     const notificaciones = await Notificacion.find({

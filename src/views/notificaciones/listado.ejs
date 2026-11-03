@@ -28,6 +28,11 @@
                 <% } %>
                 <div class="fw-bold mt-1"><%= n.mensaje %></div>
                 <small><%= n.createdAt.toLocaleString('es-AR') %></small>
+                <% if (n.coincidencia) { %>
+                  <div class="mt-2">
+                    <a href="/coincidencias/<%= n.coincidencia._id %>" class="enlace-huellapp">Ver coincidencia</a>
+                  </div>
+                <% } %>
               </div>
               <% if (!n.leida) { %>
                 <form method="POST" action="/notificaciones/<%= n._id %>/leer" class="m-0">

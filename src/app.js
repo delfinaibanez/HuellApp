@@ -50,6 +50,7 @@ app.use(async (req, res, next) => {
 app.use('/', require('./routes/auth'));
 app.use('/', require('./routes/publicaciones'));
 app.use('/', require('./routes/notificaciones'));
+app.use('/', require('./routes/coincidencias'));
 
 app.get('/', (req, res) => {
   res.render('home');

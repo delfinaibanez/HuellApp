@@ -1,0 +1,74 @@
+<%- include('partials/head', { titulo: 'Coincidencia' }) %>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 fw-bold mb-0">Posible coincidencia</h1>
+  <span class="puntaje fs-5"><%= coincidencia.puntaje %>%</span>
+</div>
+
+<% if (coincidencia.estado === 'confirmada') { %>
+  <div class="alert alert-success">¡Reencuentro confirmado! Las dos publicaciones quedaron como resueltas.</div>
+<% } else if (coincidencia.estado === 'descartada') { %>
+  <div class="alert alert-secondary">Esta coincidencia fue descartada.</div>
+<% } %>
+
+<div class="row g-4 mb-4">
+  <% [perdida, encontrada].forEach((p) => { %>
+    <div class="col-md-6">
+      <div class="tarjeta-blanca h-100">
+        <span class="etiqueta-tipo <%= p.tipo === 'encontrado' ? 'encontrado' : '' %> mb-3">
+          <%- include('partials/icono-tipo', { tipo: p.tipo }) %>
+          <%= p.tipo === 'perdido' ? 'Perdido' : 'Encontrado' %>
+        </span>
+
+        <% if (p.fotos && p.fotos.length > 0) { %>
+          <img src="<%= p.fotos[0] %>" alt="Foto de la mascota" class="foto-detalle mb-3">
+        <% } else { %>
+          <div class="sin-foto rounded-4 mb-3" style="height: 190px;">Sin foto</div>
+        <% } %>
+
+        <div class="fw-bold fs-5"><%= p.especie.charAt(0).toUpperCase() + p.especie.slice(1) %><%= p.raza ? ' · ' + p.raza : '' %></div>
+        <div><%= p.color %> · <%= p.tamano %></div>
+        <div><%= p.zona %> · <%= p.fechaEvento.toLocaleDateString('es-AR') %></div>
+        <div class="mb-3">Publicado por <%= p.usuario.nombre %></div>
+        <a href="/publicaciones/<%= p._id %>" class="enlace-huellapp">Ver publicación completa</a>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+<div class="tarjeta-blanca mb-4">
+  <h2 class="h5 fw-bold">¿Por qué creemos que coinciden?</h2>
+  <p><%= coincidencia.explicacion || 'Sin explicación disponible.' %></p>
+
+  <div class="row g-3">
+    <% if (coincidencia.rasgosCoinciden && coincidencia.rasgosCoinciden.length > 0) { %>
+      <div class="col-md-6">
+        <div class="fw-bold" style="color: var(--verde);">Coinciden</div>
+        <ul class="mb-0">
+          <% coincidencia.rasgosCoinciden.forEach((r) => { %><li><%= r %></li><% }) %>
+        </ul>
+      </div>
+    <% } %>
+    <% if (coincidencia.rasgosNoCoinciden && coincidencia.rasgosNoCoinciden.length > 0) { %>
+      <div class="col-md-6">
+        <div class="fw-bold" style="color: var(--naranja);">No coinciden</div>
+        <ul class="mb-0">
+          <% coincidencia.rasgosNoCoinciden.forEach((r) => { %><li><%= r %></li><% }) %>
+        </ul>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<% if (coincidencia.estado === 'pendiente') { %>
+  <div class="d-flex gap-3 flex-wrap">
+    <form method="POST" action="/coincidencias/<%= coincidencia._id %>/confirmar" class="m-0">
+      <button type="submit" class="btn btn-huellapp">Es mi mascota</button>
+    </form>
+    <form method="POST" action="/coincidencias/<%= coincidencia._id %>/descartar" class="m-0">
+      <button type="submit" class="btn btn-contorno">No es</button>
+    </form>
+  </div>
+<% } %>
+
+<%- include('partials/foot') %>
