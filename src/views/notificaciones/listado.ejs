@@ -1,29 +1,51 @@
-<h1>Notificaciones</h1>
+<%- include('../partials/head', { titulo: 'Notificaciones' }) %>
 
-<% if (notificaciones.some((notificacion) => !notificacion.leida)) { %>
-  <form method="POST" action="/notificaciones/leer-todas">
-    <button type="submit">Marcar todas como leídas</button>
-  </form>
-<% } %>
+<div class="row justify-content-center">
+  <div class="col-lg-8">
 
-<% if (notificaciones.length === 0) { %>
-  <p>No tenés notificaciones todavía.</p>
-<% } else { %>
-  <ul>
-    <% notificaciones.forEach((notificacion) => { %>
-      <li>
-        <p><%= notificacion.mensaje %></p>
-        <small><%= notificacion.createdAt.toLocaleString('es-AR') %></small>
-        <% if (!notificacion.leida) { %>
-          <form method="POST" action="/notificaciones/<%= notificacion._id %>/leer">
-            <button type="submit">Marcar como leída</button>
-          </form>
-        <% } else { %>
-          <span>Leída</span>
-        <% } %>
-      </li>
-    <% }) %>
-  </ul>
-<% } %>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <h1 class="h3 fw-bold mb-0">Notificaciones</h1>
+      <% if (notificaciones.some((n) => !n.leida)) { %>
+        <form method="POST" action="/notificaciones/leer-todas" class="m-0">
+          <button type="submit" class="btn btn-contorno btn-sm">Marcar todas como leídas</button>
+        </form>
+      <% } %>
+    </div>
 
-<a href="/">Volver al inicio</a>
+    <% if (notificaciones.length === 0) { %>
+      <div class="tarjeta-blanca text-center">
+        <p class="mb-1 fw-bold">No tenés notificaciones</p>
+        <p class="mb-0">Cuando encontremos una posible coincidencia, te avisamos acá.</p>
+      </div>
+    <% } else { %>
+      <div class="d-flex flex-column gap-3">
+        <% notificaciones.forEach((n) => { %>
+          <div class="notificacion <%= n.leida ? '' : 'nueva' %>">
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+              <div>
+                <% if (!n.leida) { %>
+                  <span class="badge rounded-pill" style="background: var(--naranja);">Nueva</span>
+                <% } %>
+                <div class="fw-bold mt-1"><%= n.mensaje %></div>
+                <small><%= n.createdAt.toLocaleString('es-AR') %></small>
+                <% if (n.coincidencia) { %>
+                  <div class="mt-2">
+                    <a href="/coincidencias/<%= n.coincidencia._id %>" class="enlace-huellapp">Ver coincidencia</a>
+                  </div>
+                <% } %>
+              </div>
+              <% if (!n.leida) { %>
+                <form method="POST" action="/notificaciones/<%= n._id %>/leer" class="m-0">
+                  <button type="submit" class="btn btn-contorno btn-sm">Marcar como leída</button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+  </div>
+</div>
+
+<%- include('../partials/foot') %>
