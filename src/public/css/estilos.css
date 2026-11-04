@@ -228,3 +228,11 @@ body {
   border-left-color: var(--naranja);
   background: #FFFBF7;
 }
+
+/* Mapa */
+.mapa {
+  height: 320px;
+  border-radius: 1rem;
+  border: 2px solid var(--naranja-claro);
+  z-index: 0;
+}
