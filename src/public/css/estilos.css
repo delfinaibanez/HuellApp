@@ -1,76 +1,241 @@
 :root {
-  --naranja: #B84E0F;
-  --naranja-claro: #FBE0CB;
-  --verde: #2F7D4F;
-  --verde-claro: #D9EFE1;
-  --crema: #FFF6EC;
-  --marron: #3B2A20;
-  --bs-body-font-family: 'Nunito', sans-serif;
+  --bosque: #23403A;
+  --bosque-suave: #DCEBE4;
+  --miel: #FFC857;
+  --miel-fuerte: #E0A100;
+  --crema: #FFFBF3;
+  --salvia: #E6F2EA;
+  --menta: #D4EBDD;
+  --durazno: #FFE1D3;
+  --mantequilla: #FFEBB5;
+  --perdido-fondo: #FFD2BF;
+  --perdido-texto: #8A2E0B;
+  --encontrado-fondo: #BDEFD6;
+  --encontrado-texto: #0B5C3E;
+  /* Alias para vistas que todavía usan los nombres anteriores */
+  --naranja: #8A2E0B;
+  --verde: #0B5C3E;
+  --bs-body-font-family: 'Plus Jakarta Sans', sans-serif;
+  --bs-body-color: #23403A;
 }
 
 body {
   background-color: var(--crema);
-  color: var(--marron);
-  font-family: 'Nunito', sans-serif;
+  color: var(--bosque);
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
+/* ---------- Menú ---------- */
 .navbar-huellapp {
   background-color: var(--crema);
 }
-.navbar-huellapp .navbar-brand {
-  color: var(--naranja);
-  font-weight: 800;
-  font-size: 1.6rem;
-}
 .navbar-huellapp .nav-link {
-  color: var(--marron);
+  color: var(--bosque);
   font-weight: 700;
 }
-
-.btn-huellapp {
-  background-color: var(--naranja);
-  border-color: var(--naranja);
+.logo-huella {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: var(--bosque);
+  text-decoration: none;
+}
+.logo-huella:hover {
+  color: var(--bosque);
+}
+.logo-circulo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--miel);
+  color: var(--bosque);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.campana {
+  position: relative;
+  display: inline-flex;
+  color: var(--bosque);
+}
+.contador-campana {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #D92D4A;
   color: #fff;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 1px 6px;
+}
+.btn-usuario {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--salvia);
+  border: 0;
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem 0.3rem 0.3rem;
+  font-weight: 800;
+  color: var(--bosque);
+}
+.btn-usuario:hover,
+.btn-usuario:focus,
+.btn-usuario.show {
+  background: var(--menta);
+  color: var(--bosque);
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--miel);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Botones ---------- */
+.btn-huellapp,
+.btn-miel,
+.btn-contorno,
+.btn-contorno-claro {
   font-weight: 800;
   border-radius: 999px;
   padding: 0.6rem 1.4rem;
+}
+.btn-huellapp {
+  background-color: var(--bosque);
+  border: 2px solid var(--bosque);
+  color: #fff;
 }
 .btn-huellapp:hover {
-  background-color: #9c400a;
-  border-color: #9c400a;
+  background-color: #1a312c;
+  border-color: #1a312c;
   color: #fff;
 }
-
+.btn-miel {
+  background-color: var(--miel);
+  border: 2px solid var(--miel);
+  color: var(--bosque);
+}
+.btn-miel:hover {
+  background-color: #f2b93a;
+  border-color: #f2b93a;
+  color: var(--bosque);
+}
 .btn-contorno {
-  border: 2px solid var(--marron);
-  color: var(--marron);
-  font-weight: 800;
-  border-radius: 999px;
-  padding: 0.6rem 1.4rem;
+  border: 2px solid var(--bosque);
+  color: var(--bosque);
 }
 .btn-contorno:hover {
-  background-color: var(--marron);
+  background-color: var(--bosque);
   color: #fff;
 }
+.btn-contorno-claro {
+  border: 2px solid #fff;
+  color: #fff;
+}
+.btn-contorno-claro:hover {
+  background-color: #fff;
+  color: var(--bosque);
+}
 
-/* Tarjetas "Perdí" / "Encontré" */
+/* ---------- Tarjetas y secciones ---------- */
+.tarjeta-blanca {
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 12px 30px rgba(35, 64, 58, 0.1);
+}
+.hero-oscuro {
+  background: var(--bosque);
+  color: #fff;
+}
+.hero-oscuro .texto-suave {
+  color: var(--bosque-suave);
+}
+.seccion-salvia {
+  background: var(--salvia);
+}
+.seccion-menta {
+  background: var(--menta);
+}
+.hero-titulo {
+  font-size: clamp(2rem, 5vw, 3.3rem);
+  font-weight: 800;
+  line-height: 1.08;
+}
+.tarjeta-paso {
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 1.75rem;
+  text-align: center;
+  height: 100%;
+}
+.circulo-paso {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+  color: var(--bosque);
+}
+.fondo-durazno { background: var(--durazno); }
+.fondo-menta { background: var(--menta); }
+.fondo-mantequilla { background: var(--mantequilla); }
+.tarjeta-coincidencia {
+  background: var(--salvia);
+  color: var(--bosque);
+  border-radius: 1.75rem;
+  padding: 1.25rem;
+}
+.foto-ejemplo {
+  height: 130px;
+  border-radius: 1.1rem;
+  background: var(--durazno);
+}
+.foto-ejemplo.menta {
+  background: var(--menta);
+}
+.puntaje {
+  background: var(--miel);
+  color: var(--bosque);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  font-weight: 800;
+}
+.aviso-coincidencia {
+  background: var(--menta);
+  color: var(--bosque);
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+}
+
+/* ---------- Tarjetas "Perdí" / "Encontré" ---------- */
 .tarjeta-tipo {
   display: block;
-  background: #fff;
-  border: 2px solid var(--naranja);
-  border-radius: 1.25rem;
-  padding: 1.25rem;
+  background: var(--durazno);
+  border: 2px solid transparent;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
   text-decoration: none;
-  color: var(--marron);
+  color: var(--bosque);
   height: 100%;
-  transition: transform 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.tarjeta-tipo.encontrado {
+  background: var(--menta);
 }
 .tarjeta-tipo:hover {
   transform: translateY(-3px);
-  color: var(--marron);
-}
-.tarjeta-tipo.encontrado {
-  border-color: var(--verde);
+  color: var(--bosque);
+  box-shadow: 0 10px 24px rgba(35, 64, 58, 0.12);
 }
 .circulo-icono {
   width: 56px;
@@ -80,38 +245,122 @@ body {
   align-items: center;
   justify-content: center;
   margin-bottom: 0.75rem;
-  background: var(--naranja-claro);
-  color: var(--naranja);
-}
-.encontrado .circulo-icono {
-  background: var(--verde-claro);
-  color: var(--verde);
-}
-
-.hero-titulo {
-  font-size: clamp(2rem, 5vw, 3.4rem);
-  font-weight: 800;
-  line-height: 1.1;
-}
-
-.tarjeta-blanca {
   background: #fff;
-  border-radius: 1.25rem;
-  padding: 1.5rem;
-  box-shadow: 0 12px 30px rgba(120, 60, 20, 0.12);
-}
-.foto-ejemplo {
-  height: 180px;
-  border-radius: 1rem;
-  background: #F5C9A4;
-}
-.puntaje {
-  background: var(--verde);
-  color: #fff;
-  border-radius: 999px;
-  padding: 0.4rem 1rem;
-  font-weight: 800;
+  color: var(--bosque);
 }
 
+/* ---------- Formularios ---------- */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--bosque);
+  box-shadow: 0 0 0 0.2rem rgba(35, 64, 58, 0.2);
+}
+.form-label {
+  font-weight: 700;
+}
+.enlace-huellapp {
+  color: var(--bosque);
+  font-weight: 700;
+  text-decoration: underline;
+}
+.btn-check:checked + .tarjeta-tipo {
+  border-color: var(--bosque);
+  box-shadow: 0 0 0 3px rgba(35, 64, 58, 0.25);
+}
+.btn-check:focus-visible + .tarjeta-tipo {
+  outline: 3px solid var(--bosque);
+  outline-offset: 2px;
+}
+.vista-previa {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  border: 2px solid var(--durazno);
+}
+
+/* ---------- Etiquetas de tipo ---------- */
+.etiqueta-tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  background: var(--perdido-fondo);
+  color: var(--perdido-texto);
+}
+.etiqueta-tipo.encontrado {
+  background: var(--encontrado-fondo);
+  color: var(--encontrado-texto);
+}
+.etiqueta-tipo svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- Listado y detalle ---------- */
+.tarjeta-pub {
+  background: #fff;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(35, 64, 58, 0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--bosque);
+  transition: transform 0.15s;
+}
+.tarjeta-pub:hover {
+  transform: translateY(-3px);
+  color: var(--bosque);
+}
+.tarjeta-pub img,
+.tarjeta-pub .sin-foto {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+.sin-foto {
+  background: var(--durazno);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--bosque);
+}
+.foto-detalle {
+  width: 100%;
+  max-height: 340px;
+  object-fit: cover;
+  border-radius: 1rem;
+}
+
+/* ---------- Notificaciones ---------- */
+.notificacion {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  border-left: 6px solid #D8E5DD;
+  box-shadow: 0 6px 18px rgba(35, 64, 58, 0.08);
+}
+.notificacion.nueva {
+  border-left-color: var(--miel-fuerte);
+  background: #FFFBEA;
+}
+
+/* ---------- Mapa ---------- */
+.mapa {
+  height: 320px;
+  border-radius: 1rem;
+  border: 2px solid var(--menta);
+  z-index: 0;
+}
+
+/* ---------- Pie de página ---------- */
 .footer-huellapp {
-  background-color: var(--marron);
+  background-color: var(--bosque);
+  color: #fff;
+}
