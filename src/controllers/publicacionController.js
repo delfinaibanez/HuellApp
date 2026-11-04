@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Publicacion = require('../models/Publicacion');
 const { eliminarFoto, subirFoto } = require('../services/cloudinary');
+const { buscarCoincidencias } = require('../services/matchingService');
 
 function texto(valor) {
   return typeof valor === 'string' ? valor.trim() : '';
@@ -127,9 +128,10 @@ async function crear(req, res) {
     publicacion.fotos = fotosSubidas.map((foto) => foto.url);
     await publicacion.save();
 
-    // TODO (Carolina): acá se llama al servicio de matching con IA.
-    // Debe atrapar sus propios errores para no frenar la publicación.
-    // Ejemplo: buscarCoincidencias(publicacion).catch(console.error);
+    // Matching con IA: no frena la respuesta y atrapa sus errores
+    buscarCoincidencias(publicacion).catch((error) =>
+      console.error('[matching] Error general:', error.message)
+    );
 
     res.redirect(`/publicaciones/${publicacion._id}`);
   } catch (error) {
