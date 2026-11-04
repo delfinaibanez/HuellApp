@@ -10,6 +10,20 @@ function escaparRegex(valor) {
   return valor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// Devuelve un punto cercano al real (hasta ~300 m de distancia) para no exponer la ubicación exacta.
+// Es siempre el mismo para la misma publicación, así el mapa no "salta" al recargar.
+function coordenadasAproximadas(publicacion) {
+  const [lng, lat] = publicacion.ubicacion.coordinates;
+  const semilla = parseInt(publicacion._id.toString().slice(-8), 16);
+  const angulo = ((semilla % 360) * Math.PI) / 180;
+  const metros = 100 + (semilla % 200);
+
+  const dLat = (metros * Math.cos(angulo)) / 111320;
+  const dLng = (metros * Math.sin(angulo)) / (111320 * Math.cos((lat * Math.PI) / 180));
+
+  return { lat: lat + dLat, lng: lng + dLng };
+}
+
 function mostrarFormulario(req, res) {
   const tipoInicial = ['perdido', 'encontrado'].includes(req.query.tipo)
     ? req.query.tipo
@@ -55,7 +69,9 @@ async function mostrarDetalle(req, res) {
       !!req.session.usuario &&
       publicacion.usuario._id.toString() === req.session.usuario.id;
 
-    res.render('publicacionDetalle', { publicacion, esDueno });
+    const zonaAprox = coordenadasAproximadas(publicacion);
+
+    res.render('publicacionDetalle', { publicacion, esDueno, zonaAprox });
   } catch (error) {
     console.error('Error al cargar publicación:', error.message);
     res.status(500).send('No se pudo cargar la publicación.');
@@ -113,7 +129,7 @@ async function crear(req, res) {
 
     // TODO (Carolina): acá se llama al servicio de matching con IA.
     // Debe atrapar sus propios errores para no frenar la publicación.
-    // Ejemplo: matchingService.buscarCoincidencias(publicacion).catch(console.error);
+    // Ejemplo: buscarCoincidencias(publicacion).catch(console.error);
 
     res.redirect(`/publicaciones/${publicacion._id}`);
   } catch (error) {

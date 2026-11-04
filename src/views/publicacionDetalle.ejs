@@ -1,5 +1,7 @@
 <%- include('partials/head', { titulo: 'Detalle' }) %>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 <div class="row justify-content-center">
   <div class="col-lg-8">
     <div class="tarjeta-blanca">
@@ -42,6 +44,10 @@
         <dt class="col-sm-4">Publicado por</dt><dd class="col-sm-8"><%= publicacion.usuario.nombre %></dd>
       </dl>
 
+      <h2 class="h6 fw-bold mt-4 mb-1">Zona aproximada</h2>
+      <p class="small mb-2">Por privacidad, el mapa muestra solo un área cercana y no el punto exacto.</p>
+      <div id="mapa" class="mapa"></div>
+
       <div class="d-flex gap-2 flex-wrap mt-4">
         <a href="/publicaciones" class="btn btn-contorno">Volver al listado</a>
         <% if (esDueno && publicacion.estado === 'activa') { %>
@@ -54,5 +60,24 @@
     </div>
   </div>
 </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const zona = <%- JSON.stringify(zonaAprox) %>;
+  const color = '<%= publicacion.tipo === "perdido" ? "#B84E0F" : "#2F7D4F" %>';
+
+  const mapa = L.map('mapa', { scrollWheelZoom: false }).setView([zona.lat, zona.lng], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 17,
+    attribution: '&copy; OpenStreetMap',
+  }).addTo(mapa);
+
+  L.circle([zona.lat, zona.lng], {
+    radius: 500,
+    color: color,
+    fillColor: color,
+    fillOpacity: 0.25,
+  }).addTo(mapa);
+</script>
 
 <%- include('partials/foot') %>
