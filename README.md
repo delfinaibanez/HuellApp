@@ -1,158 +1,195 @@
 # 🐾 HuellApp
 
-Plataforma web para reencontrar mascotas perdidas. Las personas publican mascotas **perdidas** o **encontradas** (especie, descripción, fotos, zona, fecha y ubicación) y una **inteligencia artificial** compara las publicaciones y avisa automáticamente cuando encuentra una coincidencia probable.
+HuellApp es una plataforma web para ayudar a reencontrar mascotas perdidas. Las personas publican avisos de mascotas perdidas o encontradas y el sistema busca posibles coincidencias usando la información y las fotos de cada publicación.
 
-> Proyecto desarrollado para una hackathon.
+> Proyecto académico desarrollado para una hackathon.
 
-## 💡 ¿Qué problema resuelve?
+## 💡 El problema
 
-Hoy las mascotas perdidas se buscan en grupos de Facebook y WhatsApp: las publicaciones se pierden en el scroll, no tienen un formato común y nadie cruza la información de quien perdió una mascota con la de quien la encontró. **HuellApp busca por vos**: ordena los datos, los cruza y te avisa.
+La búsqueda de mascotas suele repartirse entre grupos y publicaciones que se pierden rápidamente. Además, la información no siempre está presentada de la misma manera y encontrar avisos relacionados requiere que las personas los revisen manualmente.
+
+HuellApp organiza los datos de cada aviso y compara publicaciones compatibles para acercar a quienes perdieron una mascota con quienes encontraron una.
 
 ## ⚙️ ¿Cómo funciona?
 
-1. La persona se registra y crea una publicación (*Perdí* o *Encontré*).
-2. El sistema filtra las publicaciones del tipo opuesto, de la misma especie, cercanas en zona y fecha.
-3. La IA compara los candidatos y devuelve un puntaje de similitud con una explicación.
-4. Si el puntaje supera el umbral, se notifica a ambas personas dentro de la app (y por email).
-5. Las personas confirman el reencuentro y la publicación se marca como resuelta.
+1. Una persona crea una cuenta y publica que perdió o encontró una mascota.
+2. HuellApp busca publicaciones activas del tipo opuesto, de la misma especie, de otra persona, a menos de 10 km y con fechas dentro de un rango de 30 días. Se analizan hasta cinco candidatos.
+3. La IA compara los datos y las fotos de cada candidato y devuelve un puntaje, una explicación y rasgos a favor y en contra.
+4. Si el puntaje alcanza el umbral configurado, HuellApp crea una coincidencia y notifica a ambas personas dentro de la aplicación.
+5. Las personas revisan la coincidencia y deciden si corresponde. Al confirmarla, ambas publicaciones quedan resueltas.
 
-> La IA **sugiere**, nunca decide: la confirmación final es siempre humana.
+> La IA solo sugiere posibles coincidencias: las personas siempre tienen la decisión final.
 
-## 📊 Estado del proyecto
+## ✨ Funcionalidades
 
-| Módulo | Estado |
-|---|---|
-| Estructura base y conexión a MongoDB | ✅ Listo |
-| Modelos (Usuario, Publicacion, Coincidencia, Notificacion) | ✅ Listo |
-| Registro, login y logout | ✅ Listo |
-| Publicaciones (crear, listar, detalle, marcar como resuelta) | ✅ Listo |
-| Subida de fotos (Cloudinary) | ✅ Listo |
-| Notificaciones dentro de la app | ✅ Listo |
-| Diseño visual (layout, home, registro, login, formulario) | ✅ Listo |
-| Listado con filtros y detalle con el diseño nuevo | 🔄 En curso |
-| Pantalla de coincidencia y bandeja de notificaciones con el diseño nuevo | ⏳ Pendiente |
-| Matching con IA | ⏳ Pendiente |
-| Emails de aviso | ⏳ Pendiente |
-| Mapa interactivo (Leaflet) | ⏳ Pendiente |
+- Registro, inicio y cierre de sesión.
+- Inicio público para visitantes e inicio personalizado para personas registradas.
+- Creación de avisos de mascotas perdidas o encontradas, con hasta dos fotos.
+- Listado privado de avisos con filtros por tipo, especie y zona.
+- Detalle de publicación con descripción, fotos y mapa de zona aproximada.
+- Matching de publicaciones con Gemini y respaldo de Groq ante errores temporales del proveedor principal.
+- Coincidencias con puntaje, explicación y rasgos coincidentes y no coincidentes.
+- Notificaciones dentro de la app, con actualización automática cada cinco segundos y opciones para marcarlas como leídas.
+- Perfil con resumen de actividad y administración de publicaciones propias.
+- Posibilidad de marcar una publicación como resuelta o eliminarla.
+- Interfaz adaptable a escritorio y celulares.
+
+La recompensa se presenta como una propuesta para la comunidad en la demo. HuellApp no administra ni procesa pagos. Las notificaciones se muestran en la aplicación; los avisos por email todavía no están implementados.
 
 ## 🛠️ Tecnologías
 
-| Capa | Tecnología |
+| Área | Tecnología |
 |---|---|
-| Backend | Node.js + Express |
-| Vistas | EJS + Bootstrap 5 |
-| Base de datos | MongoDB Atlas + Mongoose |
-| Sesiones y contraseñas | express-session + bcryptjs |
-| Fotos | Multer + Cloudinary |
-| IA | Gemini con Groq como respaldo para comparar imágenes |
-| Emails | Nodemailer |
+| Servidor | Node.js y Express |
+| Vistas | EJS y Bootstrap 5 |
+| Base de datos | MongoDB y Mongoose |
+| Sesiones y contraseñas | express-session y bcryptjs |
+| Subida de imágenes | Multer y Cloudinary |
+| Matching de imágenes | Google Gemini, con Groq como respaldo |
+| Mapa | Leaflet y OpenStreetMap |
 
-## 📋 Requisitos previos
+## 📋 Requisitos
 
-- [Node.js](https://nodejs.org/) (versión LTS)
-- Cuenta gratuita en [MongoDB Atlas](https://www.mongodb.com/atlas)
-- Cuenta gratuita en [Cloudinary](https://cloudinary.com/)
-- API key de Gemini para el matching y, opcionalmente, una API key de Groq como respaldo si Gemini falla temporalmente. Configurá `GROQ_API_KEY` en `.env`.
+- [Node.js](https://nodejs.org/) LTS y npm.
+- Una base de datos MongoDB, por ejemplo en [MongoDB Atlas](https://www.mongodb.com/atlas).
+- Una cuenta y credenciales de [Cloudinary](https://cloudinary.com/) para las fotos.
+- Una clave de Google AI Studio para Gemini.
+- Una clave de Groq es opcional; se utiliza como respaldo cuando Gemini tiene un error temporal.
 
+## 🚀 Instalación y ejecución
 
+1. Cloná el repositorio y entrá en la carpeta:
 
+   ```bash
+   git clone https://github.com/delfinaibanez/HuellApp.git
+   cd HuellApp
+   ```
+
+2. Instalá las dependencias:
+
+   ```bash
+   npm install
+   ```
+
+3. Creá un archivo `.env` a partir de `.env.example`:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   En PowerShell podés usar:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+4. Completá en `.env` las credenciales de MongoDB, Cloudinary y Gemini. Agregá `GROQ_API_KEY` si querés habilitar el proveedor de respaldo.
+
+5. Iniciá la aplicación en modo desarrollo:
+
+   ```bash
+   npm run dev
+   ```
+
+   También podés ejecutarla con `npm start`. Por defecto, la app queda disponible en [http://localhost:3000](http://localhost:3000). Para cambiar el puerto, configurá `PORT`.
+
+No compartas ni subas el archivo `.env`: contiene credenciales privadas.
+
+## 🔧 Variables de entorno
+
+| Variable | Uso |
+|---|---|
+| `PORT` | Puerto del servidor (por defecto, `3000`). |
+| `SESSION_SECRET` | Secreto para firmar las sesiones. |
+| `MONGODB_URI` | Cadena de conexión a MongoDB. |
+| `CLOUDINARY_CLOUD_NAME` | Nombre de la cuenta de Cloudinary. |
+| `CLOUDINARY_API_KEY` | Clave de API de Cloudinary. |
+| `CLOUDINARY_API_SECRET` | Secreto de API de Cloudinary. |
+| `AI_API_KEY` | Clave de Google AI Studio para Gemini. |
+| `AI_MODEL` | Modelo de Gemini (por defecto, `gemini-2.5-flash-lite`). |
+| `GROQ_API_KEY` | Clave opcional de Groq para el respaldo. |
+| `GROQ_MODEL` | Modelo de Groq (por defecto, `qwen/qwen3.8-27b`). |
+| `MATCH_THRESHOLD` | Puntaje mínimo para crear una coincidencia (por defecto, `70`). |
+| `MATCH_RADIUS_KM` | Radio máximo de búsqueda en kilómetros (por defecto, `10`). |
+
+`EMAIL_USER` y `EMAIL_PASS` aparecen en `.env.example` como preparación para una posible integración; actualmente no se usan para enviar correos.
+
+## 🧭 Rutas principales
+
+Las rutas de publicaciones, perfil, notificaciones y coincidencias requieren iniciar sesión.
+
+| Método y ruta | Descripción |
+|---|---|
+| `GET /` | Inicio público o registrado, según la sesión. |
+| `GET /registro`, `POST /registro` | Registro de cuenta. |
+| `GET /login`, `POST /login` | Inicio de sesión. |
+| `POST /logout` | Cierre de sesión. |
+| `GET /publicaciones` | Listado de avisos; acepta `tipo`, `especie` y `zona` como filtros. |
+| `GET /publicaciones/nueva` | Formulario para crear un aviso. |
+| `POST /publicaciones` | Crear un aviso con hasta dos imágenes. |
+| `GET /publicaciones/:id` | Ver el detalle de un aviso. |
+| `POST /publicaciones/:id/resolver` | Marcar como resuelto un aviso propio. |
+| `POST /publicaciones/:id/eliminar` | Eliminar un aviso propio. |
+| `GET /perfil` | Ver el perfil y las publicaciones propias. |
+| `GET /notificaciones` | Ver las notificaciones. |
+| `GET /notificaciones/estado` | Consultar el estado de notificaciones para la actualización automática. |
+| `POST /notificaciones/:id/leer` | Marcar una notificación como leída. |
+| `POST /notificaciones/leer-todas` | Marcar todas las notificaciones como leídas. |
+| `GET /coincidencias/:id` | Ver una coincidencia asociada a una de las publicaciones propias. |
+| `POST /coincidencias/:id/confirmar` | Confirmar un posible reencuentro. |
+| `POST /coincidencias/:id/descartar` | Descartar una posible coincidencia. |
 
 ## 📁 Estructura del proyecto
 
-```
+```text
 HuellApp/
 ├── src/
-│   ├── app.js             # Configuración de Express, sesiones y rutas
-│   ├── config/            # Conexión a MongoDB y Cloudinary
-│   ├── models/            # Esquemas de Mongoose
-│   ├── controllers/       # Lógica de cada ruta
-│   ├── routes/            # Rutas de Express
-│   ├── middlewares/       # Autenticación y subida de fotos
-│   ├── services/          # Notificaciones y matching con IA
-│   ├── views/             # Plantillas EJS
-│   │   └── partials/      # Encabezado, pie de página e íconos compartidos
-│   └── public/
-│       └── css/           # Estilos propios (paleta HuellApp)
+│   ├── app.js
+│   ├── config/          # Conexión a MongoDB y servicios externos
+│   ├── controllers/     # Lógica de las rutas
+│   ├── middlewares/     # Autenticación
+│   ├── models/          # Esquemas de Mongoose
+│   ├── routes/          # Rutas de Express
+│   ├── services/        # Matching, imágenes y notificaciones
+│   ├── views/           # Vistas EJS y parciales
+│   └── public/          # CSS, imágenes y recursos públicos
 ├── .env.example
-├── .gitignore
 ├── package.json
 └── README.md
 ```
 
-## 🧭 Rutas principales
+## 🗃️ Datos y privacidad
 
-| Ruta | Descripción |
-|---|---|
-| `GET /` | Página de inicio |
-| `GET /registro`, `POST /registro` | Crear cuenta |
-| `GET /login`, `POST /login` | Iniciar sesión |
-| `POST /logout` | Cerrar sesión |
-| `GET /publicaciones` | Listado privado (requiere iniciar sesión; filtros `?tipo=&especie=&zona=`) |
-| `GET /publicaciones/nueva` | Formulario de publicación (requiere sesión) |
-| `POST /publicaciones` | Crear publicación con hasta 2 fotos |
-| `GET /publicaciones/:id` | Detalle privado de una publicación (requiere iniciar sesión) |
-| `POST /publicaciones/:id/resolver` | Marcar como resuelta (solo quien la creó) |
-| `GET /notificaciones` | Bandeja de notificaciones (requiere sesión) |
-| `POST /notificaciones/:id/leer` | Marcar una notificación como leída |
-| `POST /notificaciones/leer-todas` | Marcar todas como leídas |
-
-## 🗃️ Convenciones de datos
-
-- Los campos van en español y sin tildes ni eñes (`tamano`, `fechaEvento`).
 - `tipo`: `perdido` o `encontrado`.
 - `especie`: `perro`, `gato` u `otro`.
 - `tamano`: `pequeno`, `mediano` o `grande`.
-- `estado`: `activa` o `resuelta`.
-- La ubicación se guarda como GeoJSON en formato `[longitud, latitud]`, en ese orden.
-- Fotos: hasta 2 por publicación, JPG, PNG o WEBP, de hasta 5 MB cada una.
+- `estado` de publicación: `activa` o `resuelta`.
+- La ubicación se guarda como GeoJSON `[longitud, latitud]`.
+- Se aceptan hasta dos imágenes por aviso, en formato JPG, PNG o WEBP, de hasta 5 MB cada una.
+- El mapa del aviso muestra una zona aproximada, no la ubicación exacta.
+- La IA recibe características de la mascota y sus imágenes para realizar la comparación; no se le envían nombre, correo ni datos de contacto.
+- El listado y los detalles de avisos son privados y requieren iniciar sesión.
 
-## 🎨 Diseño
+## 🔒 Limitaciones conocidas
 
-- Paleta: naranja `#B84E0F` (perdido), verde `#2F7D4F` (encontrado), crema `#FFF6EC` (fondo) y marrón `#3B2A20` (texto).
-- Tipografía: Nunito.
-- Cada tipo de publicación tiene su ícono y color: lupa naranja para **perdido** y corazón verde para **encontrado**.
-
-## 🤝 Flujo de trabajo en equipo
-
-- `main`: versión estable, la que se muestra en la demo.
-- `develop`: donde se junta el trabajo de todas.
-- `feature/nombre-de-la-tarea`: una rama por tarea, creada desde `develop` actualizado.
-
-```bash
-git checkout develop
-git pull
-git checkout -b feature/nombre-de-la-tarea
-```
-
-- Se integra a `develop` mediante **Pull Request**.
-- Antes de cambiar de rama, `git status`: si hay cambios sin guardar, se commitean primero.
-- Antes de cada commit, verificar que **`.env` no aparezca** en `git status`.
-- Un Pull Request por tarea, y unirlo antes de crear la rama siguiente, para evitar conflictos.
-
-## 🔒 Limitaciones
-
-- La IA puede equivocarse, por eso la confirmación final es humana.
-- La calidad de las coincidencias depende de la calidad de las fotos y descripciones.
+- Un puntaje alto no confirma por sí mismo que dos avisos sean del mismo animal.
+- Los resultados dependen de la calidad y cantidad de fotos y descripciones.
+- El matching se ejecuta al crear una publicación. Si un proveedor no está disponible o el puntaje no alcanza el umbral, no se genera una coincidencia.
 - El prototipo está pensado para una zona geográfica acotada.
-- Se maneja información personal: la ubicación pública debe ser aproximada y el contacto pasa por la plataforma.
+- La gestión o el procesamiento de recompensas y los avisos por email no están implementados.
 
-## 🗺️ Próximos pasos
+## 🤝 Colaboración
 
-- Matching con IA y emails de aviso
-- Pantalla de coincidencia
-- Perfil de usuario con sus publicaciones
-- Mapa interactivo con Leaflet
-- Notificaciones push y aplicación móvil
-- Convenios con veterinarias, refugios y municipios
+El trabajo se organiza en ramas por funcionalidad y se integra mediante Pull Requests. Antes de abrir un PR, verificá que `.env` no esté entre los archivos a publicar.
 
 ## 👩‍💻 Equipo
 
 | Integrante | Área principal |
 |---|---|
-| Delfina | Backend base, autenticación, publicaciones, fotos, notificaciones y frontend |
-| Carolina | Matching con IA y emails de aviso |
+| Delfina | Backend, autenticación, publicaciones, fotos, notificaciones e interfaz |
+| Carolina | Matching con inteligencia artificial |
 | Candela | Presentación y apoyo al equipo |
 
 ## 📄 Licencia
 
-Proyecto académico desarrollado para una hackathon.
+Proyecto académico desarrollado para una hackathon. No se definió una licencia de distribución.
