@@ -1,51 +1,68 @@
 <%- include('../partials/head', { titulo: 'Notificaciones' }) %>
 
-<div class="row justify-content-center">
-  <div class="col-lg-8">
-
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-      <h1 class="h3 fw-bold mb-0">Notificaciones</h1>
-      <% if (notificaciones.some((n) => !n.leida)) { %>
-        <form method="POST" action="/notificaciones/leer-todas" class="m-0">
-          <button type="submit" class="btn btn-contorno btn-sm">Marcar todas como leídas</button>
-        </form>
-      <% } %>
+<section class="notificaciones-pagina">
+  <header class="notificaciones-encabezado">
+    <div>
+      <span class="notificaciones-sello">Tu actividad en HuellApp</span>
+      <h1>Notificaciones</h1>
+      <p>Acá vas a encontrar novedades y posibles coincidencias para revisar.</p>
     </div>
+    <div class="notificaciones-resumen" aria-live="polite">
+      <span class="notificaciones-resumen-numero" id="notificaciones-no-leidas"><%= noLeidas %></span>
+      <span><%= noLeidas === 1 ? 'notificación sin leer' : 'notificaciones sin leer' %></span>
+    </div>
+  </header>
 
-    <div class="d-flex flex-column gap-3" id="lista-notificaciones">
-      <% if (notificaciones.length === 0) { %>
-        <div class="tarjeta-blanca text-center" id="sin-notificaciones">
-          <p class="mb-1 fw-bold">No tenés notificaciones</p>
-          <p class="mb-0">Cuando encontremos una posible coincidencia, te avisamos acá.</p>
-        </div>
-      <% } else { %>
-        <% notificaciones.forEach((n) => { %>
-          <div class="notificacion <%= n.leida ? '' : 'nueva' %>" data-notificacion-id="<%= n._id %>">
-            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-              <div>
-                <% if (!n.leida) { %>
-                  <span class="badge rounded-pill" style="background: var(--naranja);">Nueva</span>
-                <% } %>
-                <div class="fw-bold mt-1"><%= n.mensaje %></div>
-                <small><%= n.createdAt.toLocaleString('es-AR') %></small>
-                <% if (n.coincidencia) { %>
-                  <div class="mt-2">
-                    <a href="/coincidencias/<%= n.coincidencia._id %>" class="enlace-huellapp">Ver coincidencia</a>
-                  </div>
-                <% } %>
-              </div>
-              <% if (!n.leida) { %>
-                <form method="POST" action="/notificaciones/<%= n._id %>/leer" class="m-0">
-                  <button type="submit" class="btn btn-contorno btn-sm">Marcar como leída</button>
-                </form>
+  <div class="notificaciones-listado-cabecera">
+    <div>
+      <h2>Novedades recientes</h2>
+      <p>Las más nuevas aparecen primero.</p>
+    </div>
+    <form method="POST" action="/notificaciones/leer-todas" class="m-0" id="notificaciones-marcar-todas-form" <%= noLeidas === 0 ? 'hidden' : '' %>>
+      <button type="submit" class="btn btn-contorno btn-sm">Marcar todas como leídas</button>
+    </form>
+  </div>
+
+  <div class="notificaciones-lista" id="lista-notificaciones" aria-live="polite">
+    <% if (notificaciones.length === 0) { %>
+      <div class="notificaciones-vacias" id="sin-notificaciones">
+        <span class="notificaciones-vacias-icono" aria-hidden="true">♡</span>
+        <h2>Por ahora, todo tranquilo</h2>
+        <p>Cuando haya novedades o una posible coincidencia, te avisamos acá.</p>
+        <a href="/publicaciones" class="btn btn-huellapp">Explorar mascotas</a>
+      </div>
+    <% } else { %>
+      <% notificaciones.forEach((n) => { %>
+        <article class="notificacion <%= n.leida ? '' : 'nueva' %>" data-notificacion-id="<%= n._id %>">
+          <span class="notificacion-icono <%= n.coincidencia ? 'es-coincidencia' : '' %>" aria-hidden="true">
+            <%= n.coincidencia ? '↗' : '•' %>
+          </span>
+          <div class="notificacion-cuerpo">
+            <div class="notificacion-etiquetas">
+              <span class="notificacion-estado <%= n.leida ? 'leida' : 'pendiente' %>">
+                <%= n.leida ? 'Leída' : 'Nueva' %>
+              </span>
+              <% if (n.coincidencia) { %>
+                <span class="notificacion-tipo">Posible coincidencia</span>
               <% } %>
             </div>
+            <p class="notificacion-mensaje"><%= n.mensaje %></p>
+            <time class="notificacion-fecha" datetime="<%= n.createdAt.toISOString() %>"><%= n.createdAt.toLocaleString('es-AR') %></time>
           </div>
-        <% }) %>
-      <% } %>
-    </div>
-
+          <div class="notificacion-acciones">
+            <% if (n.coincidencia) { %>
+              <a href="/coincidencias/<%= n.coincidencia._id %>" class="btn btn-huellapp btn-sm">Ver coincidencia <span aria-hidden="true">→</span></a>
+            <% } %>
+            <% if (!n.leida) { %>
+              <form method="POST" action="/notificaciones/<%= n._id %>/leer" class="m-0">
+                <button type="submit" class="btn btn-contorno btn-sm">Marcar leída</button>
+              </form>
+            <% } %>
+          </div>
+        </article>
+      <% }) %>
+    <% } %>
   </div>
-</div>
+</section>
 
 <%- include('../partials/foot') %>

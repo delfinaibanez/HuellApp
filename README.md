@@ -87,10 +87,10 @@ HuellApp/
 | `GET /registro`, `POST /registro` | Crear cuenta |
 | `GET /login`, `POST /login` | Iniciar sesión |
 | `POST /logout` | Cerrar sesión |
-| `GET /publicaciones` | Listado (filtros `?tipo=&especie=&zona=`) |
+| `GET /publicaciones` | Listado privado (requiere iniciar sesión; filtros `?tipo=&especie=&zona=`) |
 | `GET /publicaciones/nueva` | Formulario de publicación (requiere sesión) |
 | `POST /publicaciones` | Crear publicación con hasta 2 fotos |
-| `GET /publicaciones/:id` | Detalle de una publicación |
+| `GET /publicaciones/:id` | Detalle privado de una publicación (requiere iniciar sesión) |
 | `POST /publicaciones/:id/resolver` | Marcar como resuelta (solo quien la creó) |
 | `GET /notificaciones` | Bandeja de notificaciones (requiere sesión) |
 | `POST /notificaciones/:id/leer` | Marcar una notificación como leída |
