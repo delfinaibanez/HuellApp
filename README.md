@@ -193,7 +193,9 @@ El trabajo se organiza en ramas por funcionalidad y se integra mediante Pull Req
 ##Imagenes 
 <img width="1358" height="1582" alt="image" src="https://github.com/user-attachments/assets/bad6f96a-da2c-47f5-99c6-c92959d612ca" />
 <img width="1358" height="921" alt="image" src="https://github.com/user-attachments/assets/02c6f3b7-a7f2-48e2-a976-681e24f673a5" />
+<img width="1358" height="1158" alt="image" src="https://github.com/user-attachments/assets/0ec6ac8b-a91b-41af-9e8e-1df055112d0e" />
 <img width="1358" height="1325" alt="image" src="https://github.com/user-attachments/assets/b9edc56e-e02d-4312-9762-9f98524b1b94" />
+
 
 
 
