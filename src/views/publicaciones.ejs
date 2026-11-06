@@ -1,0 +1,66 @@
+<%- include('partials/head', { titulo: 'Publicaciones' }) %>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 fw-bold mb-0">Publicaciones</h1>
+  <a href="/publicaciones/nueva" class="btn btn-huellapp btn-sm">Nueva publicación</a>
+</div>
+
+<form method="GET" action="/publicaciones" class="tarjeta-blanca mb-4">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-3">
+      <label for="tipo" class="form-label">Tipo</label>
+      <select class="form-select" id="tipo" name="tipo">
+        <option value="">Todos</option>
+        <option value="perdido" <%= filtros.tipo === 'perdido' ? 'selected' : '' %>>Perdidos</option>
+        <option value="encontrado" <%= filtros.tipo === 'encontrado' ? 'selected' : '' %>>Encontrados</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label for="especie" class="form-label">Especie</label>
+      <select class="form-select" id="especie" name="especie">
+        <option value="">Todas</option>
+        <option value="perro" <%= filtros.especie === 'perro' ? 'selected' : '' %>>Perro</option>
+        <option value="gato" <%= filtros.especie === 'gato' ? 'selected' : '' %>>Gato</option>
+        <option value="otro" <%= filtros.especie === 'otro' ? 'selected' : '' %>>Otro</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label for="zona" class="form-label">Zona</label>
+      <input type="text" class="form-control" id="zona" name="zona" value="<%= filtros.zona || '' %>">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-huellapp w-100">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<% if (publicaciones.length === 0) { %>
+  <div class="tarjeta-blanca text-center">
+    <p class="mb-0">No hay publicaciones con esos filtros.</p>
+  </div>
+<% } else { %>
+  <div class="row g-4">
+    <% publicaciones.forEach((p) => { %>
+      <div class="col-sm-6 col-lg-4">
+        <a href="/publicaciones/<%= p._id %>" class="tarjeta-pub">
+          <% if (p.fotos && p.fotos.length > 0) { %>
+            <img src="<%= p.fotos[0] %>" alt="Foto de la mascota">
+          <% } else { %>
+            <div class="sin-foto">Sin foto</div>
+          <% } %>
+          <div class="p-3">
+            <span class="etiqueta-tipo <%= p.tipo === 'encontrado' ? 'encontrado' : '' %>">
+              <%- include('partials/icono-tipo', { tipo: p.tipo }) %>
+              <%= p.tipo === 'perdido' ? 'Perdido' : 'Encontrado' %>
+            </span>
+            <div class="fw-bold fs-5 mt-2"><%= p.especie.charAt(0).toUpperCase() + p.especie.slice(1) %><%= p.raza ? ' · ' + p.raza : '' %></div>
+            <div><%= p.color %> · <%= p.zona %></div>
+            <small><%= p.fechaEvento.toLocaleDateString('es-AR') %></small>
+          </div>
+        </a>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/foot') %>

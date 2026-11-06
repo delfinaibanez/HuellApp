@@ -1,0 +1,175 @@
+</main>
+
+<footer class="footer-huellapp">
+  <div class="container footer-contenido">
+    <div class="footer-superior">
+      <div class="footer-marca">
+        <a class="logo-huella footer-logo" href="/">
+          <span class="logo-circulo">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="5.5" cy="11" rx="2" ry="2.8"/><ellipse cx="9.5" cy="6" rx="2" ry="2.8"/><ellipse cx="14.5" cy="6" rx="2" ry="2.8"/><ellipse cx="18.5" cy="11" rx="2" ry="2.8"/><path d="M12 11.5c-3 0-5.5 3-5.5 5.8 0 1.9 1.4 2.9 2.9 2.9 1 0 1.7-.5 2.6-.5s1.6.5 2.6.5c1.5 0 2.9-1 2.9-2.9 0-2.8-2.5-5.8-5.5-5.8z"/></svg>
+          </span>
+          HuellApp
+        </a>
+        <p>Unimos personas para ayudar a que cada mascota vuelva a casa.</p>
+      </div>
+      <div class="footer-enlaces">
+        <span class="footer-titulo">Explorá</span>
+        <% if (!usuario) { %>
+          <a href="/#como-funciona">Cómo funciona</a>
+          <a href="/registro">Empezar mi búsqueda</a>
+          <a href="/login">Ya tengo cuenta</a>
+        <% } else { %>
+          <a href="/publicaciones">Mascotas publicadas</a>
+          <a href="/perfil">Mi perfil</a>
+          <a href="/notificaciones">Notificaciones</a>
+        <% } %>
+      </div>
+      <div class="footer-mensaje">
+        <span class="footer-huella" aria-hidden="true">♡</span>
+        <p>Una búsqueda compartida puede cambiarlo todo.</p>
+      </div>
+    </div>
+    <div class="footer-inferior">
+      <small>© <%= new Date().getFullYear() %> HuellApp</small>
+      <small>Hecho con cariño por quienes cuidan a los animales.</small>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<% if (usuario) { %>
+  <script>
+    (() => {
+      const campana = document.querySelector('.campana');
+      if (!campana) return;
+
+      const contadorInicial = document.getElementById('contador-campana');
+      let consultando = false;
+
+      function actualizarContador(total) {
+        let contador = document.getElementById('contador-campana');
+        if (total <= 0) {
+          contador?.remove();
+          return;
+        }
+        if (!contador) {
+          contador = document.createElement('span');
+          contador.id = 'contador-campana';
+          contador.className = 'contador-campana';
+          campana.append(contador);
+        }
+        contador.textContent = total > 99 ? '99+' : String(total);
+      }
+
+      function agregarNotificacion(notificacion) {
+        const lista = document.getElementById('lista-notificaciones');
+        if (!lista || lista.querySelector(`[data-notificacion-id="${CSS.escape(notificacion._id)}"]`)) {
+          return;
+        }
+
+        document.getElementById('sin-notificaciones')?.remove();
+        const esCoincidencia = Boolean(notificacion.coincidencia);
+        const tarjeta = document.createElement('article');
+        tarjeta.className = `notificacion${notificacion.leida ? '' : ' nueva'}`;
+        tarjeta.dataset.notificacionId = notificacion._id;
+
+        const icono = document.createElement('span');
+        icono.className = `notificacion-icono${esCoincidencia ? ' es-coincidencia' : ''}`;
+        icono.setAttribute('aria-hidden', 'true');
+        icono.textContent = esCoincidencia ? '↗' : '•';
+        tarjeta.append(icono);
+
+        const cuerpo = document.createElement('div');
+        cuerpo.className = 'notificacion-cuerpo';
+        const etiquetas = document.createElement('div');
+        etiquetas.className = 'notificacion-etiquetas';
+        const estado = document.createElement('span');
+        estado.className = `notificacion-estado ${notificacion.leida ? 'leida' : 'pendiente'}`;
+        estado.textContent = notificacion.leida ? 'Leída' : 'Nueva';
+        etiquetas.append(estado);
+        if (esCoincidencia) {
+          const tipo = document.createElement('span');
+          tipo.className = 'notificacion-tipo';
+          tipo.textContent = 'Posible coincidencia';
+          etiquetas.append(tipo);
+        }
+        cuerpo.append(etiquetas);
+
+        const mensaje = document.createElement('p');
+        mensaje.className = 'notificacion-mensaje';
+        mensaje.textContent = notificacion.mensaje;
+        cuerpo.append(mensaje);
+
+        const fecha = document.createElement('time');
+        fecha.className = 'notificacion-fecha';
+        fecha.dateTime = notificacion.createdAt;
+        fecha.textContent = new Date(notificacion.createdAt).toLocaleString('es-AR');
+        cuerpo.append(fecha);
+        tarjeta.append(cuerpo);
+
+        const acciones = document.createElement('div');
+        acciones.className = 'notificacion-acciones';
+        if (esCoincidencia) {
+          const enlace = document.createElement('a');
+          enlace.href = `/coincidencias/${encodeURIComponent(notificacion.coincidencia)}`;
+          enlace.className = 'btn btn-huellapp btn-sm';
+          enlace.append(document.createTextNode('Ver coincidencia '));
+          const flecha = document.createElement('span');
+          flecha.setAttribute('aria-hidden', 'true');
+          flecha.textContent = '→';
+          enlace.append(flecha);
+          acciones.append(enlace);
+        }
+
+        if (!notificacion.leida) {
+          const formulario = document.createElement('form');
+          formulario.method = 'POST';
+          formulario.action = `/notificaciones/${encodeURIComponent(notificacion._id)}/leer`;
+          formulario.className = 'm-0';
+          const boton = document.createElement('button');
+          boton.type = 'submit';
+          boton.className = 'btn btn-contorno btn-sm';
+          boton.textContent = 'Marcar leída';
+          formulario.append(boton);
+          acciones.append(formulario);
+        }
+        if (acciones.childElementCount) tarjeta.append(acciones);
+        lista.prepend(tarjeta);
+      }
+
+      function actualizarResumenNotificaciones(total) {
+        const resumen = document.getElementById('notificaciones-no-leidas');
+        if (resumen) resumen.textContent = String(total);
+        const marcarTodas = document.getElementById('notificaciones-marcar-todas-form');
+        if (marcarTodas) marcarTodas.hidden = total <= 0;
+      }
+
+      async function consultarNotificaciones() {
+        if (consultando || document.hidden) return;
+        consultando = true;
+        try {
+          const respuesta = await fetch('/notificaciones/estado', {
+            headers: { Accept: 'application/json' },
+            cache: 'no-store',
+          });
+          if (respuesta.status === 401) return;
+          if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+
+          const estado = await respuesta.json();
+          actualizarContador(estado.noLeidas);
+          actualizarResumenNotificaciones(estado.noLeidas);
+          estado.recientes.forEach(agregarNotificacion);
+        } catch (error) {
+          console.error('No se pudieron actualizar las notificaciones:', error.message);
+        } finally {
+          consultando = false;
+        }
+      }
+
+      window.setInterval(consultarNotificaciones, 5000);
+      document.addEventListener('visibilitychange', consultarNotificaciones);
+    })();
+  </script>
+<% } %>
+</body>
+</html>

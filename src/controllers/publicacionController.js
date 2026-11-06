@@ -1,0 +1,250 @@
+const mongoose = require('mongoose');
+const Publicacion = require('../models/Publicacion');
+const Coincidencia = require('../models/Coincidencia');
+const Notificacion = require('../models/Notificacion');
+const { eliminarFoto, subirFoto } = require('../services/cloudinary');
+const { buscarCoincidencias } = require('../services/matchingService');
+
+function texto(valor) {
+  return typeof valor === 'string' ? valor.trim() : '';
+}
+
+function escaparRegex(valor) {
+  return valor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function publicIdDesdeUrl(url) {
+  const ruta = new URL(url).pathname;
+  const coincidencia = ruta.match(/\/upload\/(?:v\d+\/)?(.+)\.[^/.]+$/);
+  return coincidencia ? decodeURIComponent(coincidencia[1]) : null;
+}
+
+// Devuelve un punto cercano al real (hasta ~300 m de distancia) para no exponer la ubicación exacta.
+// Es siempre el mismo para la misma publicación, así el mapa no "salta" al recargar.
+function coordenadasAproximadas(publicacion) {
+  const [lng, lat] = publicacion.ubicacion.coordinates;
+  const semilla = parseInt(publicacion._id.toString().slice(-8), 16);
+  const angulo = ((semilla % 360) * Math.PI) / 180;
+  const metros = 100 + (semilla % 200);
+
+  const dLat = (metros * Math.cos(angulo)) / 111320;
+  const dLng = (metros * Math.sin(angulo)) / (111320 * Math.cos((lat * Math.PI) / 180));
+
+  return { lat: lat + dLat, lng: lng + dLng };
+}
+
+function mostrarFormulario(req, res) {
+  const tipoInicial = ['perdido', 'encontrado'].includes(req.query.tipo)
+    ? req.query.tipo
+    : '';
+  res.render('publicacionNueva', { tipoInicial });
+}
+
+async function listar(req, res) {
+  try {
+    const { tipo, especie, zona } = req.query;
+    const filtro = { estado: 'activa' };
+
+    if (['perdido', 'encontrado'].includes(tipo)) filtro.tipo = tipo;
+    if (['perro', 'gato', 'otro'].includes(especie)) filtro.especie = especie;
+    if (typeof zona === 'string' && zona.trim()) {
+      filtro.zona = new RegExp(escaparRegex(zona.trim()), 'i');
+    }
+
+    const publicaciones = await Publicacion.find(filtro)
+      .sort({ createdAt: -1 })
+      .limit(60)
+      .populate('usuario', 'nombre');
+
+    res.render('publicaciones', { publicaciones, filtros: req.query });
+  } catch (error) {
+    console.error('Error al listar publicaciones:', error.message);
+    res.status(500).send('No se pudieron cargar las publicaciones.');
+  }
+}
+
+async function mostrarDetalle(req, res) {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(404).send('Publicación no encontrada.');
+  }
+
+  try {
+    const publicacion = await Publicacion.findById(req.params.id).populate('usuario', 'nombre');
+    if (!publicacion) {
+      return res.status(404).send('Publicación no encontrada.');
+    }
+
+    const esDueno =
+      !!req.session.usuario &&
+      publicacion.usuario._id.toString() === req.session.usuario.id;
+
+    const zonaAprox = coordenadasAproximadas(publicacion);
+
+    res.render('publicacionDetalle', { publicacion, esDueno, zonaAprox });
+  } catch (error) {
+    console.error('Error al cargar publicación:', error.message);
+    res.status(500).send('No se pudo cargar la publicación.');
+  }
+}
+
+async function crear(req, res) {
+  const latitudTexto = texto(req.body.latitud);
+  const longitudTexto = texto(req.body.longitud);
+  const latitud = Number(latitudTexto);
+  const longitud = Number(longitudTexto);
+
+  if (
+    !latitudTexto ||
+    !longitudTexto ||
+    !Number.isFinite(latitud) ||
+    !Number.isFinite(longitud) ||
+    latitud < -90 ||
+    latitud > 90 ||
+    longitud < -180 ||
+    longitud > 180
+  ) {
+    req.session.error = 'Ingresá una latitud y longitud válidas.';
+    return res.redirect('/publicaciones/nueva');
+  }
+
+  const publicacion = new Publicacion({
+    tipo: texto(req.body.tipo),
+    especie: texto(req.body.especie),
+    raza: texto(req.body.raza),
+    color: texto(req.body.color),
+    tamano: texto(req.body.tamano),
+    descripcion: texto(req.body.descripcion),
+    rasgos: texto(req.body.rasgos),
+    fechaEvento: texto(req.body.fechaEvento),
+    zona: texto(req.body.zona),
+    ubicacion: {
+      type: 'Point',
+      coordinates: [longitud, latitud],
+    },
+    usuario: req.session.usuario.id,
+    fotos: [],
+  });
+  const fotosSubidas = [];
+
+  try {
+    await publicacion.validate();
+
+    for (const archivo of req.files || []) {
+      fotosSubidas.push(await subirFoto(archivo.buffer));
+    }
+
+    publicacion.fotos = fotosSubidas.map((foto) => foto.url);
+    await publicacion.save();
+
+    // Matching con IA: no frena la respuesta y atrapa sus errores
+    buscarCoincidencias(publicacion).catch((error) =>
+      console.error('[matching] Error general:', error.message)
+    );
+
+    res.redirect(`/publicaciones/${publicacion._id}`);
+  } catch (error) {
+    await Promise.all(
+      fotosSubidas.map(async (foto) => {
+        try {
+          await eliminarFoto(foto.publicId);
+        } catch (errorLimpieza) {
+          console.error('Error al eliminar una foto de Cloudinary:', errorLimpieza.message);
+        }
+      })
+    );
+
+    if (error.name === 'ValidationError' || error.name === 'CastError') {
+      req.session.error = 'Completá todos los campos obligatorios con valores válidos.';
+    } else {
+      console.error('Error al crear publicación:', error.message);
+      req.session.error = 'No se pudo crear la publicación. Intentá nuevamente.';
+    }
+
+    res.redirect('/publicaciones/nueva');
+  }
+}
+
+async function marcarResuelta(req, res) {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(404).send('Publicación no encontrada.');
+  }
+
+  try {
+    const publicacion = await Publicacion.findById(req.params.id);
+    if (!publicacion) {
+      return res.status(404).send('Publicación no encontrada.');
+    }
+    if (publicacion.usuario.toString() !== req.session.usuario.id) {
+      return res.status(403).send('No tenés permiso para modificar esta publicación.');
+    }
+
+    publicacion.estado = 'resuelta';
+    await publicacion.save();
+
+    res.redirect(`/publicaciones/${publicacion._id}`);
+  } catch (error) {
+    console.error('Error al marcar como resuelta:', error.message);
+    res.status(500).send('No se pudo actualizar la publicación.');
+  }
+}
+
+async function eliminar(req, res) {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(404).send('Publicación no encontrada.');
+  }
+
+  try {
+    const publicacion = await Publicacion.findById(req.params.id);
+    if (!publicacion) {
+      return res.status(404).send('Publicación no encontrada.');
+    }
+    if (publicacion.usuario.toString() !== req.session.usuario.id) {
+      return res.status(403).send('No tenés permiso para eliminar esta publicación.');
+    }
+
+    const coincidencias = await Coincidencia.find({
+      $or: [
+        { publicacionPerdida: publicacion._id },
+        { publicacionEncontrada: publicacion._id },
+      ],
+    }).select('_id');
+    const idsCoincidencias = coincidencias.map((coincidencia) => coincidencia._id);
+
+    if (idsCoincidencias.length > 0) {
+      await Notificacion.deleteMany({ coincidencia: { $in: idsCoincidencias } });
+      await Coincidencia.deleteMany({ _id: { $in: idsCoincidencias } });
+    }
+    await Publicacion.deleteOne({ _id: publicacion._id, usuario: req.session.usuario.id });
+
+    let fotosNoEliminadas = 0;
+    for (const url of publicacion.fotos) {
+      try {
+        const publicId = publicIdDesdeUrl(url);
+        if (!publicId) {
+          throw new Error('No se pudo obtener el identificador de la foto.');
+        }
+        await eliminarFoto(publicId);
+      } catch (error) {
+        fotosNoEliminadas += 1;
+        console.error('Error al eliminar una foto de Cloudinary:', error.message);
+      }
+    }
+
+    if (fotosNoEliminadas > 0) {
+      req.session.error = `La publicación se eliminó, pero no se pudieron borrar ${fotosNoEliminadas} foto(s) de Cloudinary.`;
+    }
+    res.redirect('/perfil');
+  } catch (error) {
+    console.error('Error al eliminar publicación:', error.message);
+    res.status(500).send('No se pudo eliminar la publicación.');
+  }
+}
+
+module.exports = {
+  crear,
+  eliminar,
+  listar,
+  mostrarDetalle,
+  mostrarFormulario,
+  marcarResuelta,
+};

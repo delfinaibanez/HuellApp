@@ -1,0 +1,173 @@
+<%- include('partials/head', { titulo: 'Nueva publicación' }) %>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<% const tipoSel = locals.tipoInicial || ''; %>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="tarjeta-blanca">
+      <h1 class="h3 fw-bold mb-1">Nueva publicación</h1>
+      <p class="mb-4">Cuantos más datos y mejores fotos, más fácil es encontrar una coincidencia.</p>
+
+      <form method="POST" action="/publicaciones" enctype="multipart/form-data">
+
+        <p class="form-label mb-2">¿Qué pasó?</p>
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <input type="radio" class="btn-check" name="tipo" id="tipo-perdido" value="perdido" required <%= tipoSel === 'perdido' ? 'checked' : '' %>>
+            <label class="tarjeta-tipo" for="tipo-perdido">
+              <div class="circulo-icono"><%- include('partials/icono-tipo', { tipo: 'perdido' }) %></div>
+              <div class="fw-bold fs-5">Perdí a mi mascota</div>
+            </label>
+          </div>
+          <div class="col-sm-6">
+            <input type="radio" class="btn-check" name="tipo" id="tipo-encontrado" value="encontrado" <%= tipoSel === 'encontrado' ? 'checked' : '' %>>
+            <label class="tarjeta-tipo encontrado" for="tipo-encontrado">
+              <div class="circulo-icono"><%- include('partials/icono-tipo', { tipo: 'encontrado' }) %></div>
+              <div class="fw-bold fs-5">Encontré una mascota</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="especie" class="form-label">Especie</label>
+            <select class="form-select" id="especie" name="especie" required>
+              <option value="" selected disabled>Elegí una opción</option>
+              <option value="perro">Perro</option>
+              <option value="gato">Gato</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="tamano" class="form-label">Tamaño</label>
+            <select class="form-select" id="tamano" name="tamano" required>
+              <option value="" selected disabled>Elegí una opción</option>
+              <option value="pequeno">Pequeño</option>
+              <option value="mediano">Mediano</option>
+              <option value="grande">Grande</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="raza" class="form-label">Raza <span class="fw-normal">(opcional)</span></label>
+            <input type="text" class="form-control" id="raza" name="raza">
+          </div>
+          <div class="col-md-6">
+            <label for="color" class="form-label">Color</label>
+            <input type="text" class="form-control" id="color" name="color" required>
+          </div>
+          <div class="col-12">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+          </div>
+          <div class="col-12">
+            <label for="rasgos" class="form-label">Rasgos distintivos <span class="fw-normal">(collar, manchas, cicatrices, chip)</span></label>
+            <textarea class="form-control" id="rasgos" name="rasgos" rows="2"></textarea>
+          </div>
+          <div class="col-md-6">
+            <label for="fechaEvento" class="form-label">Fecha en que se perdió o encontró</label>
+            <input type="date" class="form-control" id="fechaEvento" name="fechaEvento" required>
+          </div>
+          <div class="col-md-6">
+            <label for="zona" class="form-label">Barrio o localidad</label>
+            <input type="text" class="form-control" id="zona" name="zona" required>
+          </div>
+
+          <div class="col-12">
+            <p class="form-label mb-1">Ubicación</p>
+            <p class="small mb-2">Hacé clic en el mapa donde se perdió o encontró la mascota.</p>
+            <div id="mapa" class="mapa mb-2"></div>
+            <button type="button" class="btn btn-contorno btn-sm" id="btnUbicacion">Usar mi ubicación actual</button>
+            <span id="msgUbicacion" class="ms-2 small"></span>
+            <div class="row g-3 mt-1">
+              <div class="col-6">
+                <label for="latitud" class="form-label small">Latitud</label>
+                <input type="text" class="form-control" id="latitud" name="latitud" placeholder="Se completa al elegir en el mapa" required>
+              </div>
+              <div class="col-6">
+                <label for="longitud" class="form-label small">Longitud</label>
+                <input type="text" class="form-control" id="longitud" name="longitud" placeholder="Se completa al elegir en el mapa" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <label for="fotos" class="form-label">Fotos <span class="fw-normal">(hasta 2, JPG, PNG o WEBP, 5 MB cada una)</span></label>
+            <input type="file" class="form-control" id="fotos" name="fotos" accept="image/jpeg,image/png,image/webp" multiple>
+            <div id="previas" class="d-flex gap-3 mt-3"></div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-huellapp w-100 mt-4">Publicar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Fecha máxima: hoy
+  document.getElementById('fechaEvento').max = new Date().toISOString().split('T')[0];
+
+  // Vista previa de fotos (máximo 2)
+  const inputFotos = document.getElementById('fotos');
+  const previas = document.getElementById('previas');
+  inputFotos.addEventListener('change', () => {
+    previas.innerHTML = '';
+    const archivos = Array.from(inputFotos.files).slice(0, 2);
+    archivos.forEach((archivo) => {
+      const img = document.createElement('img');
+      img.className = 'vista-previa';
+      img.alt = 'Vista previa de la foto';
+      img.src = URL.createObjectURL(archivo);
+      previas.appendChild(img);
+    });
+    if (inputFotos.files.length > 2) {
+      alert('Solo se permiten 2 fotos. Se usarán las primeras 2.');
+    }
+  });
+
+  // Mapa para elegir la ubicación (centrado en Mendoza por defecto)
+  const campoLat = document.getElementById('latitud');
+  const campoLng = document.getElementById('longitud');
+  const mapa = L.map('mapa').setView([-32.8895, -68.8272], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap',
+  }).addTo(mapa);
+
+  let marcador = null;
+  function ponerMarcador(lat, lng) {
+    if (marcador) {
+      marcador.setLatLng([lat, lng]);
+    } else {
+      marcador = L.marker([lat, lng]).addTo(mapa);
+    }
+    campoLat.value = lat.toFixed(6);
+    campoLng.value = lng.toFixed(6);
+  }
+  mapa.on('click', (e) => ponerMarcador(e.latlng.lat, e.latlng.lng));
+
+  // Usar la ubicación del dispositivo
+  document.getElementById('btnUbicacion').addEventListener('click', () => {
+    const msg = document.getElementById('msgUbicacion');
+    if (!navigator.geolocation) {
+      msg.textContent = 'Tu navegador no permite obtener la ubicación.';
+      return;
+    }
+    msg.textContent = 'Buscando ubicación...';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        ponerMarcador(pos.coords.latitude, pos.coords.longitude);
+        mapa.setView([pos.coords.latitude, pos.coords.longitude], 15);
+        msg.textContent = 'Ubicación completada.';
+      },
+      () => {
+        msg.textContent = 'No se pudo obtener. Elegí el punto en el mapa.';
+      }
+    );
+  });
+</script>
+
+<%- include('partials/foot') %>

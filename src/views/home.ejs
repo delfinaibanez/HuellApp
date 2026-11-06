@@ -1,0 +1,233 @@
+<%- include('partials/head', { titulo: 'Inicio' }) %>
+
+<% if (usuario) { %>
+  <section class="home-registrado-hero">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <span class="home-registrado-sello">Hola, <%= usuario.nombre %></span>
+        <h1 class="home-registrado-titulo">Cada búsqueda suma una oportunidad.</h1>
+        <p class="home-registrado-texto">
+          Publicá una mascota perdida o encontrada. Buscamos coincidencias cercanas
+          y te avisamos para que puedas revisarlas.
+        </p>
+        <div class="home-registrado-acciones">
+          <a href="/publicaciones/nueva?tipo=perdido" class="home-registrado-accion perdido">
+            <span class="home-registrado-icono"><%- include('partials/icono-tipo', { tipo: 'perdido' }) %></span>
+            <span><strong>Perdí a mi mascota</strong><small>Crear publicación</small></span>
+            <span class="home-registrado-flecha" aria-hidden="true">→</span>
+          </a>
+          <a href="/publicaciones/nueva?tipo=encontrado" class="home-registrado-accion encontrado">
+            <span class="home-registrado-icono"><%- include('partials/icono-tipo', { tipo: 'encontrado' }) %></span>
+            <span><strong>Encontré una mascota</strong><small>Ayudarla a volver a casa</small></span>
+            <span class="home-registrado-flecha" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <% if (
+          ultimaNotificacion &&
+          ultimaNotificacion.coincidencia &&
+          ultimaNotificacion.coincidencia.publicacionPerdida &&
+          ultimaNotificacion.coincidencia.publicacionEncontrada
+        ) { %>
+          <% const coincidencia = ultimaNotificacion.coincidencia; %>
+          <% const perdida = coincidencia.publicacionPerdida; %>
+          <% const encontrada = coincidencia.publicacionEncontrada; %>
+          <a class="home-ultima-coincidencia" href="/coincidencias/<%= coincidencia._id %>">
+            <div class="home-ultima-cabecera">
+              <span class="home-ultima-punto"></span>
+              <span><%= ultimaNotificacion.leida ? 'Tu última coincidencia' : 'Tenés una coincidencia nueva' %></span>
+              <span class="puntaje"><%= coincidencia.puntaje %>%</span>
+            </div>
+            <div class="home-ultima-fotos">
+              <div class="home-ultima-foto">
+                <img
+                  src="<%= perdida.fotos && perdida.fotos.length ? perdida.fotos[0] : '/images/home-perro.jpg' %>"
+                  alt="Mascota perdida"
+                >
+                <span class="etiqueta-tipo">Perdido</span>
+              </div>
+              <div class="home-ultima-foto">
+                <img
+                  src="<%= encontrada.fotos && encontrada.fotos.length ? encontrada.fotos[0] : '/images/home-perro.jpg' %>"
+                  alt="Mascota encontrada"
+                >
+                <span class="etiqueta-tipo encontrado">Encontrado</span>
+              </div>
+            </div>
+            <div class="home-ultima-cuerpo">
+              <strong>Posible coincidencia</strong>
+              <span><%= perdida.especie %> · <%= perdida.zona %></span>
+              <span class="home-ultima-enlace">Revisar explicación y rasgos <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+        <% } else { %>
+          <div class="home-sin-coincidencias">
+            <img src="/images/home-perro.jpg" alt="Perro esperando volver a casa">
+            <div class="home-sin-coincidencias-cuerpo">
+              <span class="home-publico-etiqueta">Tu comunidad está acá</span>
+              <h2 class="h4 fw-bold mt-2">Una publicación puede ser el comienzo.</h2>
+              <p class="mb-0">Cuando encontremos una posible coincidencia, te avisamos en la campana.</p>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-registrado-pasos">
+    <div>
+      <span class="home-registrado-paso-numero">01</span>
+      <strong>Publicá los detalles</strong>
+      <span>Foto, zona y características.</span>
+    </div>
+    <span class="home-registrado-paso-separador" aria-hidden="true">→</span>
+    <div>
+      <span class="home-registrado-paso-numero">02</span>
+      <strong>Buscamos coincidencias</strong>
+      <span>Comparamos datos y fotos.</span>
+    </div>
+    <span class="home-registrado-paso-separador" aria-hidden="true">→</span>
+    <div>
+      <span class="home-registrado-paso-numero">03</span>
+      <strong>Revisá el aviso</strong>
+      <span>Vos confirmás si coinciden.</span>
+    </div>
+  </section>
+
+  <section class="home-registrado-explorar">
+    <div>
+      <h2 class="h4 fw-bold mb-1">La comunidad se mueve cuando participamos.</h2>
+      <p class="mb-0">Revisá publicaciones y ayudá a que otra mascota vuelva a casa.</p>
+    </div>
+    <a href="/publicaciones" class="btn btn-contorno">Ver publicaciones</a>
+  </section>
+<% } else { %>
+  <section class="home-publico-hero">
+    <div class="row align-items-center g-4 g-lg-5">
+      <div class="col-lg-7">
+        <span class="home-publico-sello">
+          <span aria-hidden="true">●</span> Una comunidad para volver a encontrarse
+        </span>
+        <h1 class="home-publico-titulo">Si se perdió, no estás buscando a solas.</h1>
+        <p class="home-publico-bajada">
+          Compartí los datos de tu mascota. HuellApp compara publicaciones cercanas
+          y te avisa si encuentra una posible coincidencia.
+        </p>
+        <div class="d-flex flex-column flex-sm-row gap-2">
+          <a href="/registro" class="btn btn-miel btn-lg">Empezar mi búsqueda</a>
+          <a href="/registro" class="btn btn-contorno-claro btn-lg">Ayudar a una mascota</a>
+        </div>
+        <p class="home-publico-nota mb-0 mt-3">
+          Publicá y recibí alertas sin costo. Cada coincidencia la confirman las personas.
+        </p>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="home-publico-visual">
+          <img
+            src="/images/home-perro.jpg"
+            alt="Perro golden retriever con una flor en la boca"
+            class="home-publico-foto"
+            fetchpriority="high"
+          >
+          <div class="home-publico-demo" aria-label="Ejemplo de aviso de posible coincidencia">
+            <div class="home-publico-demo-cabecera">
+              <span class="home-publico-demo-punto" aria-hidden="true"></span>
+              <span>Así te avisamos</span>
+              <span class="home-publico-demo-marca">HuellApp</span>
+            </div>
+            <div class="home-publico-pareja">
+              <div class="home-publico-mascota perdido">
+                <div class="home-publico-mascota-icono" aria-hidden="true">
+                  <%- include('partials/icono-tipo', { tipo: 'perdido' }) %>
+                </div>
+                <span>Perdido</span>
+              </div>
+              <span class="home-publico-union" aria-hidden="true">↔</span>
+              <div class="home-publico-mascota encontrado">
+                <div class="home-publico-mascota-icono" aria-hidden="true">
+                  <%- include('partials/icono-tipo', { tipo: 'encontrado' }) %>
+                </div>
+                <span>Encontrado</span>
+              </div>
+            </div>
+            <div class="home-publico-demo-resultado">
+              <div>
+                <strong>Posible coincidencia</strong>
+                <span>Revisá los detalles y decidí</span>
+              </div>
+              <span class="puntaje">92%</span>
+            </div>
+            <div class="home-publico-demo-aviso">
+              <span aria-hidden="true">✓</span> Coincidir no significa confirmar: vos tenés la última palabra.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-publico-puntos" aria-label="Ventajas de HuellApp">
+    <div><span aria-hidden="true">＋</span><strong>Publicá en pocos pasos</strong></div>
+    <div><span aria-hidden="true">⌕</span><strong>Coincidencias por zona y características</strong></div>
+    <div><span aria-hidden="true">♡</span><strong>Una comunidad que ayuda</strong></div>
+  </section>
+
+  <section class="py-5" id="como-funciona">
+    <div class="text-center mb-4">
+      <span class="home-publico-etiqueta">Simple y acompañado</span>
+      <h2 class="fw-bold mt-2">Tres pasos para empezar a buscar</h2>
+      <p class="mb-0">Sumate a la comunidad y ayudá a que cada mascota vuelva a casa.</p>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <article class="home-publico-paso h-100">
+          <span class="home-publico-numero">01</span>
+          <h3 class="h5 fw-bold">Sumate a HuellApp</h3>
+          <p class="mb-0">Creá tu perfil para publicar y encontrar mascotas.</p>
+        </article>
+      </div>
+      <div class="col-md-4">
+        <article class="home-publico-paso h-100">
+          <span class="home-publico-numero">02</span>
+          <h3 class="h5 fw-bold">Contanos qué pasó</h3>
+          <p class="mb-0">Agregá una foto, la zona y los detalles que recuerdes.</p>
+        </article>
+      </div>
+      <div class="col-md-4">
+        <article class="home-publico-paso h-100">
+          <span class="home-publico-numero">03</span>
+          <h3 class="h5 fw-bold">Recibí posibles coincidencias</h3>
+          <p class="mb-0">Revisá cada aviso y contactate con la otra persona.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-publico-comunidad mb-4">
+    <div>
+      <span class="home-publico-etiqueta">Propuesta para la comunidad</span>
+      <h2 class="h3 fw-bold mt-2">Una recompensa puede reconocer a quien ayuda.</h2>
+      <p class="mb-0">
+        La familia puede ofrecer una recompensa voluntaria. Como idea para HuellApp,
+        se podría registrar el ofrecimiento y marcarlo como acordado o entregado cuando
+        se confirme el reencuentro, con condiciones acordadas entre las personas.
+      </p>
+    </div>
+    <div class="home-publico-recompensa">
+      <span>Idea en desarrollo</span>
+      <strong>Ofrecida <span aria-hidden="true">→</span> Acordada <span aria-hidden="true">→</span> Entregada</strong>
+      <small>En esta demo es una propuesta: HuellApp no administra ni procesa pagos.</small>
+    </div>
+  </section>
+
+  <section class="home-publico-cierre text-center py-4">
+    <h2 class="h3 fw-bold">Tu ayuda puede acercar un reencuentro.</h2>
+    <p class="mb-3">Contanos si estás buscando a tu mascota o si encontraste una.</p>
+    <a href="/registro" class="btn btn-huellapp">Sumarme a HuellApp</a>
+  </section>
+<% } %>
+
+<%- include('partials/foot') %>

@@ -1,0 +1,137 @@
+<%- include('partials/head', { titulo: 'Aviso de mascota' }) %>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<article class="aviso-detalle">
+  <header class="aviso-encabezado">
+    <div class="aviso-encabezado-superior">
+      <a href="/publicaciones" class="aviso-volver"><span aria-hidden="true">←</span> Volver a mascotas</a>
+      <div class="aviso-etiquetas">
+        <span class="etiqueta-tipo <%= publicacion.tipo === 'encontrado' ? 'encontrado' : '' %>">
+          <%- include('partials/icono-tipo', { tipo: publicacion.tipo }) %>
+          <%= publicacion.tipo === 'perdido' ? 'Mascota perdida' : 'Mascota encontrada' %>
+        </span>
+        <span class="aviso-estado <%= publicacion.estado === 'resuelta' ? 'resuelta' : '' %>">
+          <span aria-hidden="true"><%= publicacion.estado === 'resuelta' ? '✓' : '●' %></span>
+          <%= publicacion.estado === 'resuelta' ? 'Resuelta' : 'Activa' %>
+        </span>
+      </div>
+    </div>
+    <div class="aviso-titulo-fila">
+      <div>
+        <span class="aviso-kicker">Aviso de la comunidad</span>
+        <h1><%= publicacion.especie.charAt(0).toUpperCase() + publicacion.especie.slice(1) %><%= publicacion.raza ? ' · ' + publicacion.raza : '' %></h1>
+      </div>
+      <div class="aviso-publicado-por">
+        <span class="aviso-autor-avatar" aria-hidden="true"><%= publicacion.usuario.nombre.charAt(0).toUpperCase() %></span>
+        <span><small>Publicado por</small><strong><%= publicacion.usuario.nombre %></strong></span>
+      </div>
+    </div>
+  </header>
+
+  <section class="aviso-galeria <%= publicacion.fotos && publicacion.fotos.length > 1 ? 'aviso-galeria-multiple' : '' %>" aria-label="Fotos de la mascota">
+    <% if (publicacion.fotos && publicacion.fotos.length > 0) { %>
+      <% publicacion.fotos.forEach((url, indice) => { %>
+        <figure class="aviso-foto aviso-foto-<%= indice + 1 %>">
+          <img src="<%= url %>" alt="<%= publicacion.especie %> <%= publicacion.tipo === 'perdido' ? 'perdido' : 'encontrado' %>, foto <%= indice + 1 %>" loading="<%= indice === 0 ? 'eager' : 'lazy' %>">
+          <% if (publicacion.fotos.length > 1) { %>
+            <figcaption>Foto <%= indice + 1 %> de <%= publicacion.fotos.length %></figcaption>
+          <% } %>
+        </figure>
+      <% }) %>
+    <% } else { %>
+      <div class="aviso-sin-foto">
+        <span aria-hidden="true">♡</span>
+        <strong>Este aviso no tiene fotos</strong>
+        <small>Consultá los detalles para reconocer a la mascota.</small>
+      </div>
+    <% } %>
+  </section>
+
+  <div class="aviso-contenido">
+    <section class="aviso-informacion">
+      <div class="aviso-seccion-titulo">
+        <span class="aviso-kicker">Lo que sabemos</span>
+        <h2>Detalles de la mascota</h2>
+      </div>
+
+      <div class="aviso-datos">
+        <div class="aviso-dato">
+          <span class="aviso-dato-icono" aria-hidden="true">◉</span>
+          <span><small>Color</small><strong><%= publicacion.color %></strong></span>
+        </div>
+        <div class="aviso-dato">
+          <span class="aviso-dato-icono" aria-hidden="true">↕</span>
+          <span><small>Tamaño</small><strong><%= publicacion.tamano.charAt(0).toUpperCase() + publicacion.tamano.slice(1) %></strong></span>
+        </div>
+        <div class="aviso-dato">
+          <span class="aviso-dato-icono" aria-hidden="true">⌖</span>
+          <span><small>Zona</small><strong><%= publicacion.zona %></strong></span>
+        </div>
+        <div class="aviso-dato">
+          <span class="aviso-dato-icono" aria-hidden="true">◷</span>
+          <span><small><%= publicacion.tipo === 'perdido' ? 'Se perdió' : 'Fue encontrada' %></small><strong><time datetime="<%= publicacion.fechaEvento.toISOString() %>"><%= publicacion.fechaEvento.toLocaleDateString('es-AR') %></time></strong></span>
+        </div>
+      </div>
+
+      <div class="aviso-descripciones">
+        <div>
+          <h3>Descripción</h3>
+          <p><%= publicacion.descripcion %></p>
+        </div>
+        <% if (publicacion.rasgos) { %>
+          <div class="aviso-rasgos">
+            <h3>Señas particulares</h3>
+            <p><%= publicacion.rasgos %></p>
+          </div>
+        <% } %>
+      </div>
+    </section>
+
+    <aside class="aviso-lateral">
+      <div class="aviso-ubicacion">
+        <span class="aviso-kicker">Referencia de ubicación</span>
+        <h2>Zona aproximada</h2>
+        <p>Mostramos un área cercana para cuidar la privacidad de quien publicó.</p>
+        <div id="mapa" class="mapa"></div>
+        <small class="aviso-privacidad"><span aria-hidden="true">✓</span> No se muestra el punto exacto</small>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="aviso-acciones">
+    <a href="/publicaciones" class="btn btn-contorno">Ver otros avisos</a>
+    <% if (esDueno && publicacion.estado === 'activa') { %>
+      <form method="POST" action="/publicaciones/<%= publicacion._id %>/resolver" class="m-0">
+        <button type="submit" class="btn btn-huellapp">Marcar como resuelta</button>
+      </form>
+    <% } %>
+    <% if (esDueno) { %>
+      <form method="POST" action="/publicaciones/<%= publicacion._id %>/eliminar" class="m-0"
+        onsubmit="return confirm('¿Eliminar esta publicación? También se borrarán sus coincidencias y notificaciones. Esta acción no se puede deshacer.');">
+        <button type="submit" class="btn btn-eliminar">Eliminar aviso</button>
+      </form>
+    <% } %>
+  </footer>
+</article>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const zona = <%- JSON.stringify(zonaAprox) %>;
+  const color = '<%= publicacion.tipo === "perdido" ? "#B84E0F" : "#2F7D4F" %>';
+
+  const mapa = L.map('mapa', { scrollWheelZoom: false }).setView([zona.lat, zona.lng], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 17,
+    attribution: '&copy; OpenStreetMap',
+  }).addTo(mapa);
+
+  L.circle([zona.lat, zona.lng], {
+    radius: 500,
+    color: color,
+    fillColor: color,
+    fillOpacity: 0.25,
+  }).addTo(mapa);
+</script>
+
+<%- include('partials/foot') %>

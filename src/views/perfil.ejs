@@ -1,0 +1,103 @@
+<%- include('partials/head', { titulo: 'Mi perfil' }) %>
+
+<section class="perfil-encabezado">
+  <div class="perfil-identidad">
+    <span class="perfil-avatar" aria-hidden="true"><%= perfil.nombre.charAt(0).toUpperCase() %></span>
+    <div>
+      <span class="perfil-saludo">Tu espacio en HuellApp</span>
+      <h1><%= perfil.nombre %></h1>
+      <p><%= perfil.email %><% if (perfil.zona) { %><span aria-hidden="true"> · </span><%= perfil.zona %><% } %></p>
+    </div>
+  </div>
+  <div class="perfil-encabezado-acciones">
+    <a href="/notificaciones" class="btn btn-contorno perfil-boton-notificaciones">
+      Notificaciones
+      <% if (locals.noLeidas > 0) { %>
+        <span class="badge rounded-pill bg-danger"><%= noLeidas %></span>
+      <% } %>
+    </a>
+    <a href="/publicaciones/nueva" class="btn btn-miel">＋ Publicar mascota</a>
+  </div>
+</section>
+
+<section class="perfil-resumen" aria-label="Resumen de actividad">
+  <article class="perfil-estadistica">
+    <span class="perfil-estadistica-icono perfil-icono-activas" aria-hidden="true">●</span>
+    <div><strong><%= activas %></strong><span>Publicaciones activas</span></div>
+  </article>
+  <article class="perfil-estadistica">
+    <span class="perfil-estadistica-icono perfil-icono-resueltas" aria-hidden="true">♥</span>
+    <div><strong><%= resueltas %></strong><span>Reencuentros y casos resueltos</span></div>
+  </article>
+  <article class="perfil-estadistica">
+    <span class="perfil-estadistica-icono perfil-icono-total" aria-hidden="true">＋</span>
+    <div><strong><%= publicaciones.length %></strong><span>Publicaciones en total</span></div>
+  </article>
+</section>
+
+<section class="perfil-publicaciones">
+  <div class="perfil-seccion-cabecera">
+    <div>
+      <span class="perfil-saludo">Tu actividad</span>
+      <h2>Mis publicaciones</h2>
+    </div>
+    <% if (publicaciones.length > 0) { %>
+      <span class="perfil-total"><%= publicaciones.length %> <%= publicaciones.length === 1 ? 'aviso' : 'avisos' %></span>
+    <% } %>
+  </div>
+
+  <% if (publicaciones.length === 0) { %>
+    <div class="perfil-vacio">
+      <span class="perfil-vacio-icono" aria-hidden="true">♡</span>
+      <h3>Todavía no publicaste nada</h3>
+      <p>Creá un aviso para buscar a tu mascota o ayudar a una que encontraste.</p>
+      <div class="perfil-vacio-acciones">
+        <a href="/publicaciones/nueva?tipo=perdido" class="btn btn-huellapp">Perdí a mi mascota</a>
+        <a href="/publicaciones/nueva?tipo=encontrado" class="btn btn-contorno">Encontré una mascota</a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="perfil-lista-publicaciones">
+      <% publicaciones.forEach((p) => { %>
+        <article class="perfil-publicacion">
+          <% if (p.fotos && p.fotos.length > 0) { %>
+            <img src="<%= p.fotos[0] %>" alt="Foto de <%= p.especie %>" class="perfil-publicacion-foto">
+          <% } else { %>
+            <div class="perfil-publicacion-foto sin-foto" aria-label="Sin foto">Sin foto</div>
+          <% } %>
+
+          <div class="perfil-publicacion-info">
+            <div class="perfil-publicacion-etiquetas">
+              <span class="etiqueta-tipo <%= p.tipo === 'encontrado' ? 'encontrado' : '' %>">
+                <%- include('partials/icono-tipo', { tipo: p.tipo }) %>
+                <%= p.tipo === 'perdido' ? 'Perdido' : 'Encontrado' %>
+              </span>
+              <% if (p.estado === 'resuelta') { %>
+                <span class="perfil-estado-resuelta"><span aria-hidden="true">✓</span> Resuelta</span>
+              <% } else { %>
+                <span class="perfil-estado-activa"><span aria-hidden="true">●</span> Activa</span>
+              <% } %>
+            </div>
+            <h3><%= p.especie.charAt(0).toUpperCase() + p.especie.slice(1) %><%= p.raza ? ' · ' + p.raza : '' %></h3>
+            <p><span><%= p.zona %></span><span aria-hidden="true"> · </span><time datetime="<%= p.fechaEvento.toISOString() %>"><%= p.fechaEvento.toLocaleDateString('es-AR') %></time></p>
+          </div>
+
+          <div class="perfil-publicacion-acciones">
+            <a href="/publicaciones/<%= p._id %>" class="btn btn-contorno btn-sm">Ver aviso</a>
+            <% if (p.estado === 'activa') { %>
+              <form method="POST" action="/publicaciones/<%= p._id %>/resolver" class="m-0">
+                <button type="submit" class="btn btn-huellapp btn-sm">Marcar resuelta</button>
+              </form>
+            <% } %>
+            <form method="POST" action="/publicaciones/<%= p._id %>/eliminar" class="m-0"
+              onsubmit="return confirm('¿Eliminar esta publicación? También se borrarán sus coincidencias y notificaciones. Esta acción no se puede deshacer.');">
+              <button type="submit" class="btn btn-eliminar btn-sm">Eliminar</button>
+            </form>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/foot') %>
