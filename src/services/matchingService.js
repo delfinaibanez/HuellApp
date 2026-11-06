@@ -7,6 +7,7 @@ const RADIO_KM = Number(process.env.MATCH_RADIUS_KM) || 10;
 const MAX_CANDIDATOS = 5;
 const MAX_DIAS = 30;
 const MODELO = process.env.AI_MODEL || 'gemini-2.5-flash-lite';
+const MODELO_GROQ = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b';
 
 
 // 1) FILTRO POR REGLAS (sin IA): tipo opuesto, misma especie, cerca, fechas cercanas,
@@ -89,7 +90,7 @@ async function fotoABase64(url) {
   return { inline_data: { mime_type: tipo, data: buffer.toString('base64') } };
 }
 
-async function armarPartes(a, b, conFotos) {
+async function armarPartes(a, b, conFotos, maxFotos = Infinity) {
   const partes = [
     {
       text:
@@ -103,10 +104,13 @@ async function armarPartes(a, b, conFotos) {
   ];
 
   if (conFotos) {
+    let cantidadFotos = 0;
     for (const [nombre, p] of [['A', a], ['B', b]]) {
       for (const url of (p.fotos || []).slice(0, 2)) {
+        if (cantidadFotos >= maxFotos) break;
         partes.push({ text: `Foto de la publicación ${nombre}:` });
         partes.push(await fotoABase64(url));
+        cantidadFotos += 1;
       }
     }
   }
@@ -115,7 +119,14 @@ async function armarPartes(a, b, conFotos) {
 
 const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function llamarIA(a, b, conFotos, contador) {
+function errorProveedor(proveedor, status, detalle) {
+  const estado = status === null ? 'no está disponible' : `respondió ${status}`;
+  const error = new Error(`${proveedor} ${estado}: ${detalle}`);
+  error.temporal = status === null || status === 429 || status >= 500;
+  return error;
+}
+
+async function llamarGemini(a, b, conFotos, contador) {
   if (!process.env.AI_API_KEY) throw new Error('Falta AI_API_KEY en .env');
 
   const cuerpo = JSON.stringify({
@@ -126,18 +137,27 @@ async function llamarIA(a, b, conFotos, contador) {
   const INTENTOS = 3;
   for (let intento = 1; intento <= INTENTOS; intento++) {
     contador.llamadas += 1;
-
-    const respuesta = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': process.env.AI_API_KEY,
-        },
-        body: cuerpo,
+    let respuesta;
+    try {
+      respuesta = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': process.env.AI_API_KEY,
+          },
+          body: cuerpo,
+        }
+      );
+    } catch (error) {
+      if (intento < INTENTOS) {
+        console.error(`[matching] Gemini no disponible, reintento ${intento}/${INTENTOS - 1}...`);
+        await esperar(2000 * intento);
+        continue;
       }
-    );
+      throw errorProveedor('Gemini', null, error.message);
+    }
 
     if (respuesta.ok) {
       const dato = await respuesta.json();
@@ -147,25 +167,91 @@ async function llamarIA(a, b, conFotos, contador) {
 
     const temporal = respuesta.status === 429 || respuesta.status >= 500;
     if (temporal && intento < INTENTOS) {
-      console.error(`[matching] IA respondió ${respuesta.status}, reintento ${intento}/${INTENTOS - 1}...`);
+      console.error(`[matching] Gemini respondió ${respuesta.status}, reintento ${intento}/${INTENTOS - 1}...`);
       await esperar(2000 * intento); // 2 s, luego 4 s
       continue;
     }
 
     const detalle = await respuesta.text();
-    throw new Error(`La IA respondió ${respuesta.status}: ${detalle.slice(0, 200)}`);
+    throw errorProveedor('Gemini', respuesta.status, detalle.slice(0, 200));
   }
 }
 
-// 2) COMPARACIÓN CON IA. Si falla con fotos (ej. URL inaccesible), reintenta sin fotos.
+async function llamarGroq(a, b, conFotos, contador) {
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error('Falta GROQ_API_KEY en .env para usar el respaldo de IA.');
+  }
+
+  const partes = await armarPartes(a, b, conFotos, 3);
+  const contenido = partes.map((parte) => {
+    if (parte.inline_data) {
+      const { mime_type, data } = parte.inline_data;
+      return {
+        type: 'image_url',
+        image_url: { url: `data:${mime_type};base64,${data}` },
+      };
+    }
+    return { type: 'text', text: parte.text };
+  });
+  const INTENTOS = 2;
+
+  for (let intento = 1; intento <= INTENTOS; intento++) {
+    contador.llamadas += 1;
+    let respuesta;
+    try {
+      respuesta = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: MODELO_GROQ,
+          messages: [{ role: 'user', content: contenido }],
+          response_format: { type: 'json_object' },
+          max_completion_tokens: 600,
+        }),
+      });
+    } catch (error) {
+      if (intento < INTENTOS) {
+        console.error('[matching] Groq no disponible, reintento 1/1...');
+        await esperar(1000);
+        continue;
+      }
+      throw errorProveedor('Groq', null, error.message);
+    }
+
+    if (respuesta.ok) {
+      const dato = await respuesta.json();
+      const texto = dato.choices?.[0]?.message?.content || '';
+      return validarRespuesta(texto);
+    }
+
+    const temporal = respuesta.status === 429 || respuesta.status >= 500;
+    if (temporal && intento < INTENTOS) {
+      console.error(`[matching] Groq respondió ${respuesta.status}, reintento 1/1...`);
+      await esperar(1000);
+      continue;
+    }
+
+    const detalle = await respuesta.text();
+    throw errorProveedor('Groq', respuesta.status, detalle.slice(0, 200));
+  }
+}
+
+// 2) COMPARACIÓN CON IA. Usa Groq como respaldo ante fallas temporales de Gemini.
 async function compararConIA(a, b, contador) {
   const hayFotos = (a.fotos || []).length + (b.fotos || []).length > 0;
   try {
-    return await llamarIA(a, b, hayFotos, contador);
+    return await llamarGemini(a, b, hayFotos, contador);
   } catch (error) {
+    if (error.temporal) {
+      console.error('[matching] Gemini no disponible; intentando con Groq como respaldo.');
+      return llamarGroq(a, b, hayFotos, contador);
+    }
     if (!hayFotos) throw error;
     console.error('[matching] Falló con fotos, reintento sin fotos:', error.message);
-    return llamarIA(a, b, false, contador);
+    return llamarGemini(a, b, false, contador);
   }
 }
 

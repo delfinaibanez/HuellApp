@@ -66,6 +66,10 @@
                   <button type="submit" class="btn btn-huellapp btn-sm">Marcar como resuelta</button>
                 </form>
               <% } %>
+              <form method="POST" action="/publicaciones/<%= p._id %>/eliminar" class="m-0"
+                onsubmit="return confirm('¿Eliminar esta publicación? También se borrarán sus coincidencias y notificaciones. Esta acción no se puede deshacer.');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
+              </form>
             </div>
           </div>
         <% }) %>

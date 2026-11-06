@@ -12,15 +12,15 @@
       <% } %>
     </div>
 
-    <% if (notificaciones.length === 0) { %>
-      <div class="tarjeta-blanca text-center">
-        <p class="mb-1 fw-bold">No tenés notificaciones</p>
-        <p class="mb-0">Cuando encontremos una posible coincidencia, te avisamos acá.</p>
-      </div>
-    <% } else { %>
-      <div class="d-flex flex-column gap-3">
+    <div class="d-flex flex-column gap-3" id="lista-notificaciones">
+      <% if (notificaciones.length === 0) { %>
+        <div class="tarjeta-blanca text-center" id="sin-notificaciones">
+          <p class="mb-1 fw-bold">No tenés notificaciones</p>
+          <p class="mb-0">Cuando encontremos una posible coincidencia, te avisamos acá.</p>
+        </div>
+      <% } else { %>
         <% notificaciones.forEach((n) => { %>
-          <div class="notificacion <%= n.leida ? '' : 'nueva' %>">
+          <div class="notificacion <%= n.leida ? '' : 'nueva' %>" data-notificacion-id="<%= n._id %>">
             <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
               <div>
                 <% if (!n.leida) { %>
@@ -42,8 +42,8 @@
             </div>
           </div>
         <% }) %>
-      </div>
-    <% } %>
+      <% } %>
+    </div>
 
   </div>
 </div>

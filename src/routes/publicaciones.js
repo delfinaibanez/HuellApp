@@ -30,6 +30,7 @@ router.post(
 );
 router.get('/publicaciones/:id', publicaciones.mostrarDetalle);
 router.post('/publicaciones/:id/resolver', requireLogin, publicaciones.marcarResuelta);
+router.post('/publicaciones/:id/eliminar', requireLogin, publicaciones.eliminar);
 
 router.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
