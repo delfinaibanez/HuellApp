@@ -1,6 +1,35 @@
 const mongoose = require('mongoose');
 const Notificacion = require('../models/Notificacion');
 require('../models/Coincidencia');
+
+async function estado(req, res) {
+  try {
+    const usuarioId = req.session.usuario.id;
+    const [noLeidas, recientes] = await Promise.all([
+      Notificacion.countDocuments({ usuario: usuarioId, leida: false }),
+      Notificacion.find({ usuario: usuarioId })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .select('_id mensaje createdAt leida coincidencia')
+        .lean(),
+    ]);
+
+    res.set('Cache-Control', 'no-store');
+    res.json({
+      noLeidas,
+      recientes: recientes.map((notificacion) => ({
+        ...notificacion,
+        coincidencia: notificacion.coincidencia
+          ? String(notificacion.coincidencia)
+          : null,
+      })),
+    });
+  } catch (error) {
+    console.error('Error al consultar notificaciones nuevas:', error.message);
+    res.status(500).json({ error: 'No se pudieron consultar las notificaciones.' });
+  }
+}
+
 async function listar(req, res) {
   try {
     const notificaciones = await Notificacion.find({
@@ -55,4 +84,4 @@ async function marcarTodasLeidas(req, res) {
   }
 }
 
-module.exports = { listar, marcarLeida, marcarTodasLeidas };
+module.exports = { estado, listar, marcarLeida, marcarTodasLeidas };

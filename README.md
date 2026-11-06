@@ -44,7 +44,7 @@ Hoy las mascotas perdidas se buscan en grupos de Facebook y WhatsApp: las public
 | Base de datos | MongoDB Atlas + Mongoose |
 | Sesiones y contraseñas | express-session + bcryptjs |
 | Fotos | Multer + Cloudinary |
-| IA | API de un modelo de lenguaje con visión (Claude) |
+| IA | Gemini con Groq como respaldo para comparar imágenes |
 | Emails | Nodemailer |
 
 ## 📋 Requisitos previos
@@ -52,7 +52,7 @@ Hoy las mascotas perdidas se buscan en grupos de Facebook y WhatsApp: las public
 - [Node.js](https://nodejs.org/) (versión LTS)
 - Cuenta gratuita en [MongoDB Atlas](https://www.mongodb.com/atlas)
 - Cuenta gratuita en [Cloudinary](https://cloudinary.com/)
-- API key del proveedor de IA (para el matching)
+- API key de Gemini para el matching y, opcionalmente, una API key de Groq como respaldo si Gemini falla temporalmente. Configurá `GROQ_API_KEY` en `.env`.
 
 
 

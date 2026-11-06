@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Publicacion = require('../models/Publicacion');
+const Coincidencia = require('../models/Coincidencia');
+const Notificacion = require('../models/Notificacion');
 const { eliminarFoto, subirFoto } = require('../services/cloudinary');
+const { buscarCoincidencias } = require('../services/matchingService');
 
 function texto(valor) {
   return typeof valor === 'string' ? valor.trim() : '';
@@ -8,6 +11,12 @@ function texto(valor) {
 
 function escaparRegex(valor) {
   return valor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function publicIdDesdeUrl(url) {
+  const ruta = new URL(url).pathname;
+  const coincidencia = ruta.match(/\/upload\/(?:v\d+\/)?(.+)\.[^/.]+$/);
+  return coincidencia ? decodeURIComponent(coincidencia[1]) : null;
 }
 
 // Devuelve un punto cercano al real (hasta ~300 m de distancia) para no exponer la ubicación exacta.
@@ -127,9 +136,10 @@ async function crear(req, res) {
     publicacion.fotos = fotosSubidas.map((foto) => foto.url);
     await publicacion.save();
 
-    // TODO (Carolina): acá se llama al servicio de matching con IA.
-    // Debe atrapar sus propios errores para no frenar la publicación.
-    // Ejemplo: buscarCoincidencias(publicacion).catch(console.error);
+    // Matching con IA: no frena la respuesta y atrapa sus errores
+    buscarCoincidencias(publicacion).catch((error) =>
+      console.error('[matching] Error general:', error.message)
+    );
 
     res.redirect(`/publicaciones/${publicacion._id}`);
   } catch (error) {
@@ -178,8 +188,61 @@ async function marcarResuelta(req, res) {
   }
 }
 
+async function eliminar(req, res) {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(404).send('Publicación no encontrada.');
+  }
+
+  try {
+    const publicacion = await Publicacion.findById(req.params.id);
+    if (!publicacion) {
+      return res.status(404).send('Publicación no encontrada.');
+    }
+    if (publicacion.usuario.toString() !== req.session.usuario.id) {
+      return res.status(403).send('No tenés permiso para eliminar esta publicación.');
+    }
+
+    const coincidencias = await Coincidencia.find({
+      $or: [
+        { publicacionPerdida: publicacion._id },
+        { publicacionEncontrada: publicacion._id },
+      ],
+    }).select('_id');
+    const idsCoincidencias = coincidencias.map((coincidencia) => coincidencia._id);
+
+    if (idsCoincidencias.length > 0) {
+      await Notificacion.deleteMany({ coincidencia: { $in: idsCoincidencias } });
+      await Coincidencia.deleteMany({ _id: { $in: idsCoincidencias } });
+    }
+    await Publicacion.deleteOne({ _id: publicacion._id, usuario: req.session.usuario.id });
+
+    let fotosNoEliminadas = 0;
+    for (const url of publicacion.fotos) {
+      try {
+        const publicId = publicIdDesdeUrl(url);
+        if (!publicId) {
+          throw new Error('No se pudo obtener el identificador de la foto.');
+        }
+        await eliminarFoto(publicId);
+      } catch (error) {
+        fotosNoEliminadas += 1;
+        console.error('Error al eliminar una foto de Cloudinary:', error.message);
+      }
+    }
+
+    if (fotosNoEliminadas > 0) {
+      req.session.error = `La publicación se eliminó, pero no se pudieron borrar ${fotosNoEliminadas} foto(s) de Cloudinary.`;
+    }
+    res.redirect('/perfil');
+  } catch (error) {
+    console.error('Error al eliminar publicación:', error.message);
+    res.status(500).send('No se pudo eliminar la publicación.');
+  }
+}
+
 module.exports = {
   crear,
+  eliminar,
   listar,
   mostrarDetalle,
   mostrarFormulario,
