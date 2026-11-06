@@ -4,6 +4,8 @@ const session = require('express-session');
 const path = require('path');
 const connectDB = require('./config/db');
 const Notificacion = require('./models/Notificacion');
+require('./models/Coincidencia');
+require('./models/Publicacion');
 
 const app = express();
 
@@ -53,8 +55,29 @@ app.use('/', require('./routes/notificaciones'));
 app.use('/', require('./routes/coincidencias'));
 app.use('/', require('./routes/perfil'));
 
-app.get('/', (req, res) => {
-  res.render('home');
+app.get('/', async (req, res) => {
+  try {
+    let ultimaNotificacion = null;
+    if (req.session.usuario) {
+      ultimaNotificacion = await Notificacion.findOne({
+        usuario: req.session.usuario.id,
+        coincidencia: { $exists: true, $ne: null },
+      })
+        .sort({ createdAt: -1 })
+        .populate({
+          path: 'coincidencia',
+          populate: [
+            { path: 'publicacionPerdida', select: 'especie raza fotos zona' },
+            { path: 'publicacionEncontrada', select: 'especie raza fotos zona' },
+          ],
+        });
+    }
+
+    res.render('home', { ultimaNotificacion });
+  } catch (error) {
+    console.error('Error al cargar el inicio:', error.message);
+    res.status(500).send('No se pudo cargar el inicio.');
+  }
 });
 
 const PORT = process.env.PORT || 3000;

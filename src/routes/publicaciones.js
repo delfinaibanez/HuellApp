@@ -20,7 +20,7 @@ const subirFotos = multer({
   },
 });
 
-router.get('/publicaciones', publicaciones.listar);
+router.get('/publicaciones', requireLogin, publicaciones.listar);
 router.get('/publicaciones/nueva', requireLogin, publicaciones.mostrarFormulario);
 router.post(
   '/publicaciones',
@@ -28,7 +28,7 @@ router.post(
   subirFotos.array('fotos', 2),
   publicaciones.crear
 );
-router.get('/publicaciones/:id', publicaciones.mostrarDetalle);
+router.get('/publicaciones/:id', requireLogin, publicaciones.mostrarDetalle);
 router.post('/publicaciones/:id/resolver', requireLogin, publicaciones.marcarResuelta);
 router.post('/publicaciones/:id/eliminar', requireLogin, publicaciones.eliminar);
 
