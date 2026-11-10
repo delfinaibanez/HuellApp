@@ -2,7 +2,7 @@
 
 HuellApp es una plataforma web para ayudar a reencontrar mascotas perdidas. Las personas publican avisos de mascotas perdidas o encontradas y el sistema busca posibles coincidencias usando la información y las fotos de cada publicación.
 
-> Proyecto académico desarrollado para una hackathon.
+> Proyecto académico desarrollado para Fundamentos de IA ( Final ) 
 
 ## 💡 El problema
 
